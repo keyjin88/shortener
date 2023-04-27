@@ -32,10 +32,6 @@ func (api *API) Start() error {
 	api.logger.Info("logger configured successfully.")
 	api.configureRouterField()
 	api.logger.Info("router configured successfully.")
-	api.configureStorageField()
-	api.logger.Info("storage configured successfully.")
-	api.configureShortenService()
-	api.logger.Info("shorten service configured successfully.")
 
 	api.logger.Info("starting api server at port: ", "8080")
 	//На этапе валидного завршениея стратуем http-сервер
@@ -54,17 +50,6 @@ func (api *API) configureLoggerField() error {
 
 // Конфигурируем router API
 func (api *API) configureRouterField() {
-	api.router.HandleFunc("/", api.ShortenURL).Methods(http.MethodPost)
-	api.router.HandleFunc("/{id}", api.GetShortenedURL).Methods(http.MethodGet)
-}
-
-// Конфигурируем сервисы
-func (api *API) configureShortenService() {
-	api.shortener = service.NewShortenService(api.storage)
-	// тут нужно будет задавать сервису ссылку на хранилище
-}
-
-// Конфигурируем хранидлище
-func (api *API) configureStorageField() {
-	api.storage = storage.NewStorage()
+	api.router.HandleFunc("/", ShortenURL).Methods(http.MethodPost)
+	api.router.HandleFunc("/{id}", GetShortenedURL).Methods(http.MethodGet)
 }

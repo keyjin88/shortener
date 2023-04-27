@@ -20,6 +20,6 @@ func (s *ShortenService) ShortenString(url string) (string, error) {
 	return uid, nil
 }
 
-func (s *ShortenService) GetShortenedUrl(id string) (string, bool, error) {
+func (s *ShortenService) GetShortenedURL(id string) (string, bool, error) {
 	return s.storage.Urls().FindByShortenedString(id)
 }

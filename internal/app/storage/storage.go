@@ -1,7 +1,7 @@
 package storage
 
 type Storage struct {
-	urlRepository *UrlRepository
+	urlRepository *URLRepository
 }
 
 func NewStorage() *Storage {
@@ -9,11 +9,11 @@ func NewStorage() *Storage {
 }
 
 // public repo for URLS
-func (s *Storage) Urls() *UrlRepository {
+func (s *Storage) Urls() *URLRepository {
 	if s.urlRepository != nil {
 		return s.urlRepository
 	}
-	a := &UrlRepository{
+	a := &URLRepository{
 		storage: s,
 	}
 	s.urlRepository = a

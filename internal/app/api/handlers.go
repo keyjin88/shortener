@@ -64,7 +64,7 @@ func (api *API) GetShortenedURL(writer http.ResponseWriter, request *http.Reques
 		json.NewEncoder(writer).Encode(msg)
 		return
 	}
-	originalUrl, ok, _ := api.shortener.GetShortenedUrl(id)
+	originalURL, ok, _ := api.shortener.GetShortenedURL(id)
 	if !ok {
 		api.logger.Infof("URL not found by id: %s. Error while Api.GetShortenedURL()", id)
 		msg := Message{
@@ -77,7 +77,7 @@ func (api *API) GetShortenedURL(writer http.ResponseWriter, request *http.Reques
 		return
 	} else {
 		api.logger.Infof("Запрос на получение URL по id: %s", id)
-		writer.Header().Set("Location", originalUrl)
+		writer.Header().Set("Location", originalURL)
 		writer.WriteHeader(http.StatusTemporaryRedirect)
 	}
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/google/uuid"
 )
 
-type UrlRepository struct {
+type URLRepository struct {
 	storage *Storage
 }
 
@@ -17,7 +17,7 @@ func init() {
 	inmemStorage = make(map[string]string)
 }
 
-func (ur *UrlRepository) Create(url string) (string, error) {
+func (ur *URLRepository) Create(url string) (string, error) {
 	u, err := uuid.NewRandom()
 	if err != nil {
 		return "", err
@@ -27,7 +27,7 @@ func (ur *UrlRepository) Create(url string) (string, error) {
 	return uuidStr, nil
 }
 
-func (ur *UrlRepository) FindByShortenedString(id string) (string, bool, error) {
+func (ur *URLRepository) FindByShortenedString(id string) (string, bool, error) {
 	for shortenStr, url := range inmemStorage {
 		if shortenStr == id {
 			return url, true, nil

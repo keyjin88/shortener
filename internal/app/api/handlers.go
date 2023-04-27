@@ -69,7 +69,7 @@ func (api *API) GetShortenedURL(writer http.ResponseWriter, request *http.Reques
 		api.logger.Infof("URL not found by id: %s. Error while Api.GetShortenedURL()", id)
 		msg := Message{
 			StatusCode: http.StatusBadRequest,
-			Message:    fmt.Sprintf("URL not found by id: %s. Error while Api.GetShortenedURL(), id"),
+			Message:    fmt.Sprintf("URL not found by id: %s. Error while Api.GetShortenedURL()", id),
 			IsError:    true,
 		}
 		writer.WriteHeader(http.StatusBadRequest)

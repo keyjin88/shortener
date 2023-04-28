@@ -2,36 +2,36 @@ package api
 
 import (
 	"bytes"
-	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
-	"strings"
 	"testing"
 )
 
-func getApi() *API {
+func getAPI() *API {
 	api := New()
 	api.setupRouter()
 	api.configureShortenerService()
-	api.config.ParseFlags()
 	return api
 }
 
 func TestAPI_ShortenURL(t *testing.T) {
-	api := getApi()
+	api := getAPI()
 	router := api.router
 	request := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("www.ya.ru")))
 
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, request)
 	assert.EqualValues(t, http.StatusCreated, w.Code)
-	assert.True(t, strings.HasPrefix(w.Body.String(), "http://localhost"))
+	assert.EqualValues(t, len(w.Body.String()), 8)
 }
 
 func TestAPI_GetShortenedURL(t *testing.T) {
-	api := getApi()
+	api := getAPI()
+	router := api.router
+	request := httptest.NewRequest(http.MethodGet, "/shortedURL", nil)
+
 	w := httptest.NewRecorder()
-	api.GetShortenedURL(gin.CreateTestContextOnly(w, api.router))
+	router.ServeHTTP(w, request)
 	assert.EqualValues(t, http.StatusBadRequest, w.Code)
 }

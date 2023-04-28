@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
@@ -47,7 +48,7 @@ func main() {
 	defer func(Body io.ReadCloser) {
 		err := Body.Close()
 		if err != nil {
-
+			logrus.Error("error while closing response body")
 		}
 	}(response.Body)
 	// читаем поток из тела ответа

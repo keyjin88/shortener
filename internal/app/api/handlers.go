@@ -4,16 +4,13 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/keyjin88/shortener/internal/app/api/helpers"
-	"github.com/keyjin88/shortener/internal/app/service"
-	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 )
 
 var (
-	logger    = logrus.New()
-	shortener = service.NewShortenService(storage.NewStorage())
+	logger = logrus.New()
 )
 
 // Вспомогательная структура для формирования сообщений
@@ -23,7 +20,7 @@ type Message struct {
 	IsError    bool   `json:"is_error"`
 }
 
-func ShortenURL(c *gin.Context) {
+func (api *API) ShortenURL(c *gin.Context) {
 	c.Header("Content-Type", "text/plain")
 	requestBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
@@ -31,7 +28,7 @@ func ShortenURL(c *gin.Context) {
 		helpers.RespondJSON(c, 400, "Invalid url string.")
 		return
 	}
-	shortenString, err := shortener.ShortenString(string(requestBytes))
+	shortenString, err := api.shortener.ShortenString(string(requestBytes))
 	if err != nil {
 		logger.Error("Trouble while shortening url. Error while shortener.ShortenString() :", err)
 		helpers.RespondJSON(c, 400, "Trouble while shortening url.")
@@ -39,14 +36,14 @@ func ShortenURL(c *gin.Context) {
 	}
 	logger.Infof("Запрос на сокращение URL: %s", string(requestBytes))
 	c.Status(http.StatusCreated)
-	_, err = c.Writer.Write([]byte("http://localhost:8080/" + shortenString))
+	_, err = c.Writer.Write([]byte(api.config.Flags.BaseAddr + shortenString))
 	if err != nil {
 		return
 	}
 }
-func GetShortenedURL(c *gin.Context) {
+func (api *API) GetShortenedURL(c *gin.Context) {
 	id := c.Params.ByName("id")
-	originalURL, ok, err := shortener.GetShortenedURL(id)
+	originalURL, ok, err := api.shortener.GetShortenedURL(id)
 	if err != nil {
 		logger.Error("Trouble while getting shortened url. Error while shortener.GetShortenedURL() :", err)
 		helpers.RespondJSON(c, 400, "Trouble while getting shortened url.")

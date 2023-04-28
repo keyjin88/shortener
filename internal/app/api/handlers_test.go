@@ -10,19 +10,24 @@ import (
 	"testing"
 )
 
-func TestGetShortenedURL(t *testing.T) {
-	router := gin.Default()
-	router.GET("/:id", GetShortenedURL)
-	request := httptest.NewRequest(http.MethodGet, "/UUID", nil)
+func getApi() *API {
+	api := New()
+	api.setupRouter()
+	api.configureShortenerService()
+	api.config.ParseFlags()
+	return api
+}
 
+func TestGetShortenedURL(t *testing.T) {
+	api := getApi()
 	w := httptest.NewRecorder()
-	router.ServeHTTP(w, request)
+	api.GetShortenedURL(gin.CreateTestContextOnly(w, api.router))
 	assert.EqualValues(t, http.StatusBadRequest, w.Code)
 }
 
 func TestShortenURL(t *testing.T) {
-	router := gin.Default()
-	router.POST("/", ShortenURL)
+	api := getApi()
+	router := api.router
 	request := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("www.ya.ru")))
 
 	w := httptest.NewRecorder()

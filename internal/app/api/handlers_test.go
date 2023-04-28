@@ -18,14 +18,7 @@ func getApi() *API {
 	return api
 }
 
-func TestGetShortenedURL(t *testing.T) {
-	api := getApi()
-	w := httptest.NewRecorder()
-	api.GetShortenedURL(gin.CreateTestContextOnly(w, api.router))
-	assert.EqualValues(t, http.StatusBadRequest, w.Code)
-}
-
-func TestShortenURL(t *testing.T) {
+func TestAPI_ShortenURL(t *testing.T) {
 	api := getApi()
 	router := api.router
 	request := httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("www.ya.ru")))
@@ -34,4 +27,11 @@ func TestShortenURL(t *testing.T) {
 	router.ServeHTTP(w, request)
 	assert.EqualValues(t, http.StatusCreated, w.Code)
 	assert.True(t, strings.HasPrefix(w.Body.String(), "http://localhost"))
+}
+
+func TestAPI_GetShortenedURL(t *testing.T) {
+	api := getApi()
+	w := httptest.NewRecorder()
+	api.GetShortenedURL(gin.CreateTestContextOnly(w, api.router))
+	assert.EqualValues(t, http.StatusBadRequest, w.Code)
 }

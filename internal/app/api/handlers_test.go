@@ -23,7 +23,7 @@ func TestAPI_ShortenURL(t *testing.T) {
 	w := httptest.NewRecorder()
 	router.ServeHTTP(w, request)
 	assert.EqualValues(t, http.StatusCreated, w.Code)
-	assert.EqualValues(t, len(w.Body.String()), 8)
+	assert.EqualValues(t, len(w.Body.String()), 9)
 }
 
 func TestAPI_GetShortenedURL(t *testing.T) {

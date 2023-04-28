@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/sirupsen/logrus"
@@ -11,7 +11,7 @@ import (
 // API is the Base server instance description
 type API struct {
 	logger    *logrus.Logger
-	router    *mux.Router
+	router    *gin.Engine
 	shortener *service.ShortenService
 	storage   *storage.Storage
 }
@@ -20,7 +20,7 @@ type API struct {
 func New() *API {
 	return &API{
 		logger: logrus.New(),
-		router: mux.NewRouter(),
+		router: SetupRouter(),
 	}
 }
 
@@ -30,11 +30,7 @@ func (api *API) Start() error {
 		return err
 	}
 	api.logger.Info("logger configured successfully.")
-	api.configureRouterField()
-	api.logger.Info("router configured successfully.")
-
 	api.logger.Info("starting api server at port: ", "8080")
-	//На этапе валидного завршениея стратуем http-сервер
 	return http.ListenAndServe("localhost:8080", api.router)
 }
 
@@ -48,8 +44,13 @@ func (api *API) configureLoggerField() error {
 	return nil
 }
 
-// Конфигурируем router API
-func (api *API) configureRouterField() {
-	api.router.HandleFunc("/", ShortenURL).Methods(http.MethodPost)
-	api.router.HandleFunc("/{id}", GetShortenedURL).Methods(http.MethodGet)
+func SetupRouter() *gin.Engine {
+	router := gin.Default()
+	//В Gin принято группировать ресурсы
+	apiV1Group := router.Group("/")
+	{
+		apiV1Group.POST("/", ShortenURL)
+		apiV1Group.GET("/:id", GetShortenedURL)
+	}
+	return router
 }

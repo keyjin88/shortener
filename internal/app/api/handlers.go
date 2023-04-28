@@ -1,9 +1,9 @@
 package api
 
 import (
-	"encoding/json"
 	"fmt"
-	"github.com/gorilla/mux"
+	"github.com/gin-gonic/gin"
+	"github.com/keyjin88/shortener/internal/app/api/helpers"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/sirupsen/logrus"
@@ -23,69 +23,43 @@ type Message struct {
 	IsError    bool   `json:"is_error"`
 }
 
-func ShortenURL(writer http.ResponseWriter, request *http.Request) {
-	writer.Header().Set("Content-Type", "text/plain")
-	requestBytes, err := io.ReadAll(request.Body)
+func ShortenURL(c *gin.Context) {
+	c.Header("Content-Type", "text/plain")
+	requestBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		logger.Error("Invalid url string. Error while Api.ShortenURL() :", err)
-		msg := Message{
-			StatusCode: http.StatusBadRequest,
-			Message:    err.Error(),
-			IsError:    true,
-		}
-		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(msg)
+		logger.Error("Invalid url string. Error while ShortenURL() :", err)
+		helpers.RespondJSON(c, 400, "Invalid url string.")
 		return
 	}
 	shortenString, err := shortener.ShortenString(string(requestBytes))
 	if err != nil {
 		logger.Error("Trouble while shortening url. Error while shortener.ShortenString() :", err)
-		msg := Message{
-			StatusCode: http.StatusBadRequest,
-			Message:    err.Error(),
-			IsError:    true,
-		}
-		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(msg)
+		helpers.RespondJSON(c, 400, "Trouble while shortening url.")
 		return
 	}
 	logger.Infof("Запрос на сокращение URL: %s", string(requestBytes))
-	writer.WriteHeader(http.StatusCreated)
-	_, err = writer.Write([]byte("http://localhost:8080/" + shortenString))
+	c.Status(http.StatusCreated)
+	_, err = c.Writer.Write([]byte("http://localhost:8080/" + shortenString))
 	if err != nil {
 		return
 	}
 }
-
-func GetShortenedURL(writer http.ResponseWriter, request *http.Request) {
-	//Логируем момент начала обработки запроса
-	logger.Info("Get All Articles GET /api/v1/articles")
-	id, ok := mux.Vars(request)["id"]
-	if !ok {
-		logger.Info("Invalid id. Error while Api.GetShortenedURL() :", mux.Vars(request)["id"])
-		msg := Message{
-			StatusCode: http.StatusBadRequest,
-			Message:    "Invalid id",
-			IsError:    true,
-		}
-		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(msg)
+func GetShortenedURL(c *gin.Context) {
+	id := c.Params.ByName("id")
+	originalURL, ok, err := shortener.GetShortenedURL(id)
+	if err != nil {
+		logger.Error("Trouble while getting shortened url. Error while shortener.GetShortenedURL() :", err)
+		helpers.RespondJSON(c, 400, "Trouble while getting shortened url.")
 		return
 	}
-	originalURL, ok, _ := shortener.GetShortenedURL(id)
 	if !ok {
 		logger.Infof("URL not found by id: %s. Error while Api.GetShortenedURL()", id)
-		msg := Message{
-			StatusCode: http.StatusBadRequest,
-			Message:    fmt.Sprintf("URL not found by id: %s. Error while Api.GetShortenedURL()", id),
-			IsError:    true,
-		}
-		writer.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(writer).Encode(msg)
+		helpers.RespondJSON(c, 400, fmt.Sprintf("URL not found by id: %s", id))
 		return
 	} else {
 		logger.Infof("Запрос на получение URL по id: %s", id)
-		writer.Header().Set("Location", originalURL)
-		writer.WriteHeader(http.StatusTemporaryRedirect)
+		c.Header("Location", originalURL)
+		c.Status(http.StatusTemporaryRedirect)
+		return
 	}
 }

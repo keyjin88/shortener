@@ -9,8 +9,8 @@ type Config struct {
 }
 
 type Flags struct {
-	Port     string
-	BaseAddr string
+	ServerAddress string
+	BaseAddr      string
 }
 
 func NewConfig() *Config {
@@ -20,7 +20,7 @@ func NewConfig() *Config {
 // ParseFlags обрабатывает аргументы командной строки
 // и сохраняет их значения в соответствующих переменных
 func (config *Config) ParseFlags() {
-	flag.StringVar(&config.Flags.Port, "a", "8080", "address and port to run server")
+	flag.StringVar(&config.Flags.ServerAddress, "a", "localhost:8080", "address and port to run server")
 	flag.StringVar(&config.Flags.BaseAddr, "b", "http://localhost:8080/", "base address for shortened url")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()

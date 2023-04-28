@@ -39,9 +39,9 @@ func (api *API) Start() error {
 		return err
 	}
 	api.logger.Info("logger configured successfully.")
-	port := api.config.Flags.Port
-	api.logger.Info("starting api server at port: ", port)
-	return http.ListenAndServe("localhost:"+port, api.router)
+	serverAddress := api.config.Flags.ServerAddress
+	api.logger.Info("starting api server at: ", serverAddress)
+	return http.ListenAndServe(serverAddress, api.router)
 }
 
 // Конфигурируем logger

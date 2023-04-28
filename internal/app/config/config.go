@@ -21,7 +21,7 @@ func NewConfig() *Config {
 // и сохраняет их значения в соответствующих переменных
 func (config *Config) ParseFlags() {
 	flag.StringVar(&config.Flags.ServerAddress, "a", "localhost:8080", "address and port to run server")
-	flag.StringVar(&config.Flags.BaseAddr, "b", "http://localhost:8080/", "base address for shortened url")
+	flag.StringVar(&config.Flags.BaseAddr, "b", "http://localhost:8080", "base address for shortened url")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()
 }

@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	ServerAddress string `env:"SERVER_ADDRESS"`
-	BaseAddr      string `env:"BASE_URL"`
+	BaseAddress   string `env:"BASE_URL"`
 }
 
 func NewConfig() *Config {
@@ -20,7 +20,7 @@ func NewConfig() *Config {
 // и сохраняет их значения в соответствующих переменных
 func (config *Config) InitConfig() {
 	flag.StringVar(&config.ServerAddress, "a", "localhost:8080", "address and port to run server")
-	flag.StringVar(&config.BaseAddr, "b", "http://localhost:8080", "base address for shortened url")
+	flag.StringVar(&config.BaseAddress, "b", "http://localhost:8080", "base address for shortened url")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()
 	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по уиолчанию из флагов
@@ -28,5 +28,5 @@ func (config *Config) InitConfig() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println(config)
+	fmt.Printf("Starting server with configs: ServerAddress {%s}, BaseAddress {%s}", config.ServerAddress, config.BaseAddress)
 }

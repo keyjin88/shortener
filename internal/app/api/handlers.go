@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
+	"net/url"
 )
 
 var (
@@ -24,11 +25,17 @@ func (api *API) ShortenURL(c *gin.Context) {
 	c.Header("Content-Type", "text/plain")
 	requestBytes, err := io.ReadAll(c.Request.Body)
 	if err != nil {
-		logger.Error("Invalid url string. Error while ShortenURL() :", err)
+		logger.Error("Error while read request body. Error from handlers.ShortenURL() :", err)
+		helpers.RespondJSON(c, 400, "Invalid request body.")
+		return
+	}
+	uri, err := url.ParseRequestURI(string(requestBytes))
+	if err != nil {
+		logger.Error("Invalid url string. Error from url.ParseRequestURI() :", err)
 		helpers.RespondJSON(c, 400, "Invalid url string.")
 		return
 	}
-	shortenString, err := api.shortener.ShortenString(string(requestBytes))
+	shortenString, err := api.shortener.ShortenString(uri.String())
 	if err != nil {
 		logger.Error("Trouble while shortening url. Error while shortener.ShortenString() :", err)
 		helpers.RespondJSON(c, 400, "Trouble while shortening url.")
@@ -36,7 +43,7 @@ func (api *API) ShortenURL(c *gin.Context) {
 	}
 	logger.Infof("Запрос на сокращение URL: %s", string(requestBytes))
 	c.Status(http.StatusCreated)
-	_, err = c.Writer.Write([]byte(api.config.BaseAddr + "/" + shortenString))
+	_, err = c.Writer.Write([]byte(api.config.BaseAddress + "/" + shortenString))
 	if err != nil {
 		return
 	}

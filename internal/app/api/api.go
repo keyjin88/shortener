@@ -32,14 +32,14 @@ func (api *API) Start() error {
 	api.logger.Info("setting up router")
 	api.setupRouter()
 	api.logger.Info("read flags")
-	api.config.ParseFlags()
+	api.config.InitConfig()
 	api.logger.Info("configure services")
 	api.configureShortenerService()
 	if err := api.configureLoggerField(); err != nil {
 		return err
 	}
 	api.logger.Info("logger configured successfully.")
-	serverAddress := api.config.Flags.ServerAddress
+	serverAddress := api.config.ServerAddress
 	api.logger.Info("starting api server at: ", serverAddress)
 	return http.ListenAndServe(serverAddress, api.router)
 }

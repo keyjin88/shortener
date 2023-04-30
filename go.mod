@@ -3,6 +3,7 @@ module github.com/keyjin88/shortener
 go 1.20
 
 require (
+	github.com/caarlos0/env/v6 v6.10.1
 	github.com/gin-gonic/gin v1.9.0
 	github.com/google/uuid v1.3.0
 	github.com/sirupsen/logrus v1.9.0

@@ -2,26 +2,31 @@ package config
 
 import (
 	"flag"
+	"fmt"
+	"github.com/caarlos0/env/v6"
+	"log"
 )
 
 type Config struct {
-	Flags *Flags
-}
-
-type Flags struct {
-	ServerAddress string
-	BaseAddr      string
+	ServerAddress string `env:"SERVER_ADDRESS"`
+	BaseAddr      string `env:"BASE_URL"`
 }
 
 func NewConfig() *Config {
-	return &Config{Flags: &Flags{}}
+	return &Config{}
 }
 
-// ParseFlags обрабатывает аргументы командной строки
+// InitConfig обрабатывает аргументы командной строки
 // и сохраняет их значения в соответствующих переменных
-func (config *Config) ParseFlags() {
-	flag.StringVar(&config.Flags.ServerAddress, "a", "localhost:8080", "address and port to run server")
-	flag.StringVar(&config.Flags.BaseAddr, "b", "http://localhost:8080", "base address for shortened url")
+func (config *Config) InitConfig() {
+	flag.StringVar(&config.ServerAddress, "a", "localhost:8080", "address and port to run server")
+	flag.StringVar(&config.BaseAddr, "b", "http://localhost:8080", "base address for shortened url")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()
+	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по уиолчанию из флагов
+	err := env.Parse(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+	fmt.Println(config)
 }

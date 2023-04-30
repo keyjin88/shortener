@@ -36,7 +36,7 @@ func (api *API) ShortenURL(c *gin.Context) {
 	}
 	logger.Infof("Запрос на сокращение URL: %s", string(requestBytes))
 	c.Status(http.StatusCreated)
-	_, err = c.Writer.Write([]byte(api.config.Flags.BaseAddr + "/" + shortenString))
+	_, err = c.Writer.Write([]byte(api.config.BaseAddr + "/" + shortenString))
 	if err != nil {
 		return
 	}

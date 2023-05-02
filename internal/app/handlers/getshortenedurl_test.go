@@ -48,9 +48,10 @@ func TestHandler_GetShortenedURL(t *testing.T) {
 			context, _ := gin.CreateTestContext(w)
 			if tt.name == "Get successfully" {
 				context.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("https://ya.ru")))
+				logger.Info("Status before ShortenURL(): ", context.Writer.Status())
 				h.ShortenURL(context)
+				logger.Info("Status after ShortenURL(): ", context.Writer.Status())
 				shortenURL := w.Body.String()
-				logger.Info("Shorten url: ", shortenURL)
 
 				// Обновляем контекст и responseRecorder
 				w = httptest.NewRecorder()
@@ -62,7 +63,9 @@ func TestHandler_GetShortenedURL(t *testing.T) {
 						Value: shortenURL[1:],
 					},
 				}
+				logger.Info("Status before GetShortenedURL(): ", context.Writer.Status())
 				h.GetShortenedURL(context)
+				logger.Info("Status after GetShortenedURL(): ", context.Writer.Status())
 				assert.EqualValues(t, tt.expectedCode, w.Code)
 				assert.EqualValues(t, "https://ya.ru", w.Header().Get("Location"))
 			} else {
@@ -73,53 +76,3 @@ func TestHandler_GetShortenedURL(t *testing.T) {
 		})
 	}
 }
-
-//func TestAPI_GetShortenedURL(t *testing.T) {
-//	api := getAPI()
-//	w, context := getGinTestContext()
-//	context.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("http://ya.ru")))
-//	api.ShortenURL(context)
-//	shortenUrl := w.Body.String()
-//	logger.Info("Shorten url: ", shortenUrl)
-//
-//	context.Request = httptest.NewRequest(http.MethodGet, shortenUrl, nil)
-//	context.Params = []gin.Param{
-//		{
-//			Key:   "id",
-//			Value: shortenUrl[1:],
-//		},
-//	}
-//	api.GetShortenedURL(context)
-//	// я совершенно не понимаю, почему я проставляю статус в методе api,
-//	// но во время выполнения тестов он не меняется  ((
-//	// при этом после первого запроса статус во врайтере меняется на 201
-//	//assert.EqualValues(t, http.StatusTemporaryRedirect, w.Code)
-//	assert.EqualValues(t, "http://ya.ru", w.Header().Get("Location"))
-//}
-
-//func TestAPI_GetShortenedURL(t *testing.T) {
-//	api := getAPI()
-//	w, context := getGinTestContext()
-//
-//	shortedUrl, _ := api.storage.Urls().Create("http://www.ya.ru")
-//	logger.Info("Shorten url: /", shortedUrl)
-//
-//	context.Request = httptest.NewRequest(http.MethodGet, "/"+shortedUrl, nil)
-//	context.Params = []gin.Param{
-//		{
-//			Key:   "id",
-//			Value: shortedUrl,
-//		},
-//	}
-//	api.GetShortenedURL(context)
-//	//assert.EqualValues(t, http.StatusTemporaryRedirect, w.Code)
-//	assert.EqualValues(t, "http://www.ya.ru", w.Header().Get("Location"))
-//}
-
-//func TestAPI_GetShortenedURL_BadRequest(t *testing.T) {
-//	api := getAPI()
-//	w, context := getGinTestContext()
-//	context.Request = httptest.NewRequest(http.MethodGet, "/shortedURL", nil)
-//	api.GetShortenedURL(context)
-//	assert.EqualValues(t, http.StatusBadRequest, w.Code)
-//}

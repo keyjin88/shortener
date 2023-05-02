@@ -8,9 +8,9 @@ import (
 
 func (h *Handler) GetShortenedURL(c *gin.Context) {
 	id := c.Params.ByName("id")
-	originalURL, ok := h.shortener.GetShortenedURLById(id)
+	originalURL, ok := h.shortener.GetShortenedURLByID(id)
 	if !ok {
-		logger.Infof("URL not found by id: %s. Error while Api.GetShortenedURLById()", id)
+		logger.Infof("URL not found by id: %s. Error while Api.GetShortenedURLByID()", id)
 		c.Status(http.StatusBadRequest)
 		_, err := c.Writer.Write([]byte(fmt.Sprintf("URL not found by id: %s", id)))
 		if err != nil {

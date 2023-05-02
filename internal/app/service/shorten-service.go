@@ -20,7 +20,7 @@ func (s *ShortenService) ShortenString(url string) (string, error) {
 			return "", err
 		}
 		keyStr := u.String()[:8]
-		_, ok := s.GetShortenedURLById(keyStr)
+		_, ok := s.GetShortenedURLByID(keyStr)
 		if !ok {
 			s.urlRepository.Create(keyStr, url)
 			return keyStr, nil
@@ -28,6 +28,6 @@ func (s *ShortenService) ShortenString(url string) (string, error) {
 	}
 }
 
-func (s *ShortenService) GetShortenedURLById(id string) (string, bool) {
+func (s *ShortenService) GetShortenedURLByID(id string) (string, bool) {
 	return s.urlRepository.FindByShortenedString(id)
 }

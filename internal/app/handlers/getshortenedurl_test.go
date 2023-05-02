@@ -44,6 +44,7 @@ func TestHandler_GetShortenedURL(t *testing.T) {
 				shortener: tt.fields.shortener,
 				config:    tt.fields.config,
 			}
+			gin.SetMode(gin.TestMode)
 			w := httptest.NewRecorder()
 			context, _ := gin.CreateTestContext(w)
 			if tt.name == "Get successfully" {

@@ -60,6 +60,9 @@ func (api *API) configureLoggerField() error {
 }
 
 func (api *API) setupRouter() {
+	if api.config.GinReleaseMode {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	router := gin.Default()
 	//В Gin принято группировать ресурсы
 	apiV1Group := router.Group("/")

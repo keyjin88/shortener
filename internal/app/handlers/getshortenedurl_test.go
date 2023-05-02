@@ -49,8 +49,8 @@ func TestHandler_GetShortenedURL(t *testing.T) {
 			if tt.name == "Get successfully" {
 				context.Request = httptest.NewRequest(http.MethodPost, "/", bytes.NewBuffer([]byte("https://ya.ru")))
 				h.ShortenURL(context)
-				shortenUrl := w.Body.String()
-				logger.Info("Shorten url: ", shortenUrl)
+				shortenURL := w.Body.String()
+				logger.Info("Shorten url: ", shortenURL)
 
 				// Обновляем контекст и responseRecorder
 				w = httptest.NewRecorder()
@@ -59,7 +59,7 @@ func TestHandler_GetShortenedURL(t *testing.T) {
 				context.Params = []gin.Param{
 					{
 						Key:   "id",
-						Value: shortenUrl[1:],
+						Value: shortenURL[1:],
 					},
 				}
 				h.GetShortenedURL(context)

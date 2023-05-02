@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"net/url"
@@ -14,6 +15,10 @@ func (h *Handler) ShortenURL(c *gin.Context) {
 		logger.Error("Error while read request body. Error from handlers.ShortenURL() :", err)
 		c.Status(http.StatusBadRequest)
 		_, err = c.Writer.Write([]byte("Invalid request body."))
+		if err != nil {
+			logrus.Error(err.Error())
+			return
+		}
 		return
 	}
 	uri, err := url.ParseRequestURI(string(requestBytes))
@@ -21,6 +26,10 @@ func (h *Handler) ShortenURL(c *gin.Context) {
 		logger.Error("Invalid url string. Error from url.ParseRequestURI() :", err)
 		c.Status(http.StatusBadRequest)
 		_, err = c.Writer.Write([]byte("Invalid url string."))
+		if err != nil {
+			logrus.Error(err.Error())
+			return
+		}
 		return
 	}
 	shortenString, err := h.shortener.ShortenString(uri.String())
@@ -28,6 +37,10 @@ func (h *Handler) ShortenURL(c *gin.Context) {
 		logger.Error("Trouble while shortening url. Error while shortener.ShortenString() :", err)
 		c.Status(http.StatusBadRequest)
 		_, err = c.Writer.Write([]byte("Trouble while shortening url."))
+		if err != nil {
+			logrus.Error(err.Error())
+			return
+		}
 		return
 	}
 	logger.Infof("Запрос на сокращение URL: %s", string(requestBytes))

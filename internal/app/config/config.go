@@ -2,8 +2,8 @@ package config
 
 import (
 	"flag"
-	"fmt"
 	"github.com/caarlos0/env/v6"
+	"github.com/sirupsen/logrus"
 	"log"
 )
 
@@ -28,5 +28,6 @@ func (config *Config) InitConfig() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Printf("Starting server with configs: ServerAddress {%s}, BaseAddress {%s}", config.ServerAddress, config.BaseAddress)
+	logrus.Infof("Starting server with configs: ServerAddress {%s}, BaseAddress {%s}\n", config.ServerAddress,
+		config.BaseAddress)
 }

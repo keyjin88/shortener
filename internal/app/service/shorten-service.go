@@ -1,25 +1,33 @@
 package service
 
-import "github.com/keyjin88/shortener/internal/app/storage"
+import (
+	"github.com/google/uuid"
+	"github.com/keyjin88/shortener/internal/app/storage"
+)
 
 type ShortenService struct {
-	storage *storage.Storage
+	urlRepository storage.URLRepository
 }
 
-func NewShortenService(storage *storage.Storage) *ShortenService {
-	return &ShortenService{
-		storage: storage,
-	}
+func NewShortenService(urlRepository storage.URLRepository) *ShortenService {
+	return &ShortenService{urlRepository: urlRepository}
 }
 
 func (s *ShortenService) ShortenString(url string) (string, error) {
-	uid, err := s.storage.Urls().Create(url)
-	if err != nil {
-		return "", err
+	for {
+		u, err := uuid.NewRandom()
+		if err != nil {
+			return "", err
+		}
+		keyStr := u.String()[:8]
+		_, ok := s.GetShortenedURLById(keyStr)
+		if !ok {
+			s.urlRepository.Create(keyStr, url)
+			return keyStr, nil
+		}
 	}
-	return uid, nil
 }
 
-func (s *ShortenService) GetShortenedURL(id string) (string, bool, error) {
-	return s.storage.Urls().FindByShortenedString(id)
+func (s *ShortenService) GetShortenedURLById(id string) (string, bool) {
+	return s.urlRepository.FindByShortenedString(id)
 }

@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/keyjin88/shortener/internal/app/api"
+	"github.com/keyjin88/shortener/internal/app"
 	"log"
 )
 
 func main() {
-	server := api.New()
+	server := app.New()
 	//api server start
-	log.Fatal(server.Start())
+	log.Panicln(server.Start())
 }

@@ -18,7 +18,7 @@ func (h *Handler) GetShortenedURL(c *gin.Context) {
 		}
 		return
 	} else {
-		logger.Infof("Запрос на получение URL по id: %s", id)
+		logger.Infof("Запрос на получение URL по id: %s, originalURL: %s", id, originalURL)
 		c.Redirect(http.StatusTemporaryRedirect, originalURL)
 		return
 	}

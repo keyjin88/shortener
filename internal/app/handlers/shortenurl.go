@@ -43,7 +43,7 @@ func (h *Handler) ShortenURL(c *gin.Context) {
 		}
 		return
 	}
-	logger.Infof("Запрос на сокращение URL: %s", string(requestBytes))
+	logger.Infof("Запрос на сокращение URL: %s, результат: %s", string(requestBytes), shortenString)
 	c.Status(http.StatusCreated)
 	_, err = c.Writer.Write([]byte(h.config.BaseAddress + "/" + shortenString))
 	if err != nil {

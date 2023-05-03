@@ -11,11 +11,7 @@ func (h *Handler) GetShortenedURL(c *gin.Context) {
 	originalURL, ok := h.shortener.GetShortenedURLByID(id)
 	if !ok {
 		logger.Infof("URL not found by id: %s. Error while Api.GetShortenedURLByID()", id)
-		c.Status(http.StatusBadRequest)
-		_, err := c.Writer.Write([]byte(fmt.Sprintf("URL not found by id: %s", id)))
-		if err != nil {
-			return
-		}
+		c.String(http.StatusBadRequest, fmt.Sprintf("URL not found by id: %s", id))
 		return
 	} else {
 		logger.Infof("Запрос на получение URL по id: %s, originalURL: %s", id, originalURL)

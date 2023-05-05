@@ -66,11 +66,18 @@ func (api *API) setupRouter() {
 	router := gin.Default()
 	//В Gin принято группировать ресурсы
 	apiV1Group := router.Group("/")
-	apiV1Group.POST("/", api.handlers.ShortenURL)
-	apiV1Group.GET("/:id", api.handlers.GetShortenedURL)
+	apiV1Group.POST("/", wrapper(api.handlers.ShortenURL))
+	apiV1Group.GET("/:id", wrapper(api.handlers.GetShortenedURL))
 	api.router = router
 }
 
 func (api *API) configureHandlers() {
 	api.handlers = handlers.NewHandler(api.shortener, api.config)
+}
+
+// wrapper нужен для передачи в роутер наших ручек. Возсожно есть вариант более правильный, но я его не нашел
+func wrapper(f func(c handlers.RequestContext)) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		f(c)
+	}
 }

@@ -1,15 +1,13 @@
 package handlers
 
 import (
-	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 	"net/url"
 )
 
-func (h *Handler) ShortenURL(c *gin.Context) {
+func (h *Handler) ShortenURL(c RequestContext) {
 	c.Header("Content-Type", "text/plain")
-	requestBytes, err := io.ReadAll(c.Request.Body)
+	requestBytes, err := c.GetRawData()
 	if err != nil {
 		logger.Error("Error while read request body. Error from handlers.ShortenURL() :", err)
 		c.String(http.StatusBadRequest, "Invalid request body.")

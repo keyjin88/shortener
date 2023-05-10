@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-type shortenUrlReturn struct {
+type shortenURLReturn struct {
 	result string
 	error  error
 }
@@ -26,7 +26,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 		name               string
 		url                string
 		getRowDataReturn   getRowDataReturn
-		serviceReturn      shortenUrlReturn
+		serviceReturn      shortenURLReturn
 		expectedCode       int
 		expectedBody       string
 		expectedStringCall int
@@ -36,7 +36,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 			name:               "Create successfully",
 			url:                "https://ya.ru",
 			getRowDataReturn:   getRowDataReturn{result: []byte("https://ya.ru"), error: nil},
-			serviceReturn:      shortenUrlReturn{result: "SHORTURL", error: nil},
+			serviceReturn:      shortenURLReturn{result: "SHORTURL", error: nil},
 			expectedCode:       http.StatusCreated,
 			expectedBody:       "/SHORTURL",
 			expectedStringCall: 1,
@@ -46,7 +46,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 			name:               "Invalid request body",
 			url:                "ww.bad url",
 			getRowDataReturn:   getRowDataReturn{result: nil, error: errors.New("error from GetRowData()")},
-			serviceReturn:      shortenUrlReturn{result: "", error: nil},
+			serviceReturn:      shortenURLReturn{result: "", error: nil},
 			expectedCode:       http.StatusBadRequest,
 			expectedBody:       "Invalid request body.",
 			expectedStringCall: 1,
@@ -56,7 +56,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 			name:               "Invalid url string.",
 			url:                "htt=bad_url.ru",
 			getRowDataReturn:   getRowDataReturn{result: []byte("htt=bad_url.ru"), error: nil},
-			serviceReturn:      shortenUrlReturn{result: "", error: nil},
+			serviceReturn:      shortenURLReturn{result: "", error: nil},
 			expectedCode:       http.StatusBadRequest,
 			expectedBody:       "Invalid url string.",
 			expectedStringCall: 1,
@@ -66,7 +66,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 			name:               "Trouble while shortening url.",
 			url:                "https://ya.ru",
 			getRowDataReturn:   getRowDataReturn{result: []byte("https://ya.ru"), error: nil},
-			serviceReturn:      shortenUrlReturn{result: "", error: errors.New("error from shorten service")},
+			serviceReturn:      shortenURLReturn{result: "", error: errors.New("error from shorten service")},
 			expectedCode:       http.StatusBadRequest,
 			expectedBody:       "Trouble while shortening url.",
 			expectedStringCall: 1,

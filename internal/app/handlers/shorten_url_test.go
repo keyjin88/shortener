@@ -5,6 +5,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers/mocks"
+	"github.com/keyjin88/shortener/internal/app/logger"
 	"net/http"
 	"testing"
 )
@@ -20,6 +21,7 @@ type getRowDataReturn struct {
 }
 
 func TestHandler_ShortenURLWithMock(t *testing.T) {
+	logger.Initialize("info")
 	ctrl := gomock.NewController(t)
 
 	tests := []struct {

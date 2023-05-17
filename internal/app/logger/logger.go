@@ -3,7 +3,6 @@ package logger
 import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
-	"time"
 )
 
 // Log будет доступен всему коду как синглтон.
@@ -24,7 +23,7 @@ func Initialize(level string) error {
 	// устанавливаем уровень
 	cfg.Level = lvl
 	//настраиваем формат даты
-	cfg.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout(time.DateTime)
+	cfg.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 	// создаём логер на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {

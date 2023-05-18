@@ -16,7 +16,10 @@ type getShortenURLReturn struct {
 }
 
 func TestHandler_GetShortenedURLWithMock(t *testing.T) {
-	logger.Initialize("info")
+	err := logger.Initialize("info")
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctrl := gomock.NewController(t)
 
 	tests := []struct {

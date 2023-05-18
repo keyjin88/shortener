@@ -21,7 +21,10 @@ type getRowDataReturn struct {
 }
 
 func TestHandler_ShortenURLWithMock(t *testing.T) {
-	logger.Initialize("info")
+	err := logger.Initialize("info")
+	if err != nil {
+		t.Fatal(err)
+	}
 	ctrl := gomock.NewController(t)
 
 	tests := []struct {

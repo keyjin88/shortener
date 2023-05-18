@@ -48,10 +48,10 @@ func (api *API) setupRouter() {
 	router := gin.New()
 	//Использую стандартный логгер gin. В итоге нужно будет выбрать какой-то один
 	//router.Use(gin.Logger())
-	apiV1Group := router.Group("/")
-	//Использую свой кастомный логгер.
-	apiV1Group.POST("/", handlers.WithLogging(api.handlers.ShortenURL))
-	apiV1Group.GET("/:id", handlers.WithLogging(api.handlers.GetShortenedURL))
+	rootGroup := router.Group("/")
+	rootGroup.POST("api/shorten", handlers.WithLogging(api.handlers.ShortenURL))
+	rootGroup.POST("", handlers.WithLogging(api.handlers.ShortenURL))
+	rootGroup.GET(":id", handlers.WithLogging(api.handlers.GetShortenedURL))
 	api.router = router
 }
 

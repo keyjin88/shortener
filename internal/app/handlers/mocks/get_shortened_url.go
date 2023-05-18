@@ -33,6 +33,20 @@ func (m *MockRequestContext) EXPECT() *MockRequestContextMockRecorder {
 	return m.recorder
 }
 
+// FullPath mocks base method.
+func (m *MockRequestContext) FullPath() string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FullPath")
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// FullPath indicates an expected call of FullPath.
+func (mr *MockRequestContextMockRecorder) FullPath() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FullPath", reflect.TypeOf((*MockRequestContext)(nil).FullPath))
+}
+
 // GetRawData mocks base method.
 func (m *MockRequestContext) GetRawData() ([]byte, error) {
 	m.ctrl.T.Helper()
@@ -60,6 +74,18 @@ func (mr *MockRequestContextMockRecorder) Header(arg0, arg1 interface{}) *gomock
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Header", reflect.TypeOf((*MockRequestContext)(nil).Header), arg0, arg1)
 }
 
+// JSON mocks base method.
+func (m *MockRequestContext) JSON(arg0 int, arg1 interface{}) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "JSON", arg0, arg1)
+}
+
+// JSON indicates an expected call of JSON.
+func (mr *MockRequestContextMockRecorder) JSON(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "JSON", reflect.TypeOf((*MockRequestContext)(nil).JSON), arg0, arg1)
+}
+
 // Param mocks base method.
 func (m *MockRequestContext) Param(arg0 string) string {
 	m.ctrl.T.Helper()
@@ -84,6 +110,20 @@ func (m *MockRequestContext) Redirect(arg0 int, arg1 string) {
 func (mr *MockRequestContextMockRecorder) Redirect(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Redirect", reflect.TypeOf((*MockRequestContext)(nil).Redirect), arg0, arg1)
+}
+
+// ShouldBind mocks base method.
+func (m *MockRequestContext) ShouldBind(arg0 interface{}) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ShouldBind", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// ShouldBind indicates an expected call of ShouldBind.
+func (mr *MockRequestContextMockRecorder) ShouldBind(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShouldBind", reflect.TypeOf((*MockRequestContext)(nil).ShouldBind), arg0)
 }
 
 // String mocks base method.

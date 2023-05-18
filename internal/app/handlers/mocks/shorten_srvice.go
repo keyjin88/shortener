@@ -48,17 +48,17 @@ func (mr *MockShortenServiceMockRecorder) GetShortenedURLByID(arg0 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShortenedURLByID", reflect.TypeOf((*MockShortenService)(nil).GetShortenedURLByID), arg0)
 }
 
-// ShortenString mocks base method.
-func (m *MockShortenService) ShortenString(arg0 string) (string, error) {
+// ShortenURL mocks base method.
+func (m *MockShortenService) ShortenURL(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ShortenString", arg0)
+	ret := m.ctrl.Call(m, "ShortenURL", arg0)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
-// ShortenString indicates an expected call of ShortenString.
-func (mr *MockShortenServiceMockRecorder) ShortenString(arg0 interface{}) *gomock.Call {
+// ShortenURL indicates an expected call of ShortenURL.
+func (mr *MockShortenServiceMockRecorder) ShortenURL(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenString", reflect.TypeOf((*MockShortenService)(nil).ShortenString), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenURL", reflect.TypeOf((*MockShortenService)(nil).ShortenURL), arg0)
 }

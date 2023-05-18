@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (s *ShortenService) ShortenString(url string) (string, error) {
+func (s *ShortenService) ShortenURL(url string) (string, error) {
 	for {
 		randomUUID, err := uuid.NewRandom()
 		if err != nil {

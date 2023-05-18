@@ -12,12 +12,15 @@ type RequestContext interface {
 	Param(key string) string
 	Header(key, value string)
 	GetRawData() ([]byte, error)
+	ShouldBind(obj any) error
+	JSON(code int, obj any)
+	FullPath() string
 }
 
 //go:generate mockgen -destination=mocks/shorten_srvice.go -package=mocks . ShortenService
 type ShortenService interface {
-	ShortenString(url string) (string, error)
 	GetShortenedURLByID(id string) (string, bool)
+	ShortenURL(url string) (string, error)
 }
 
 type Handler struct {

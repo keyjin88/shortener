@@ -36,7 +36,7 @@ func TestShortenService_ShortenString(t *testing.T) {
 				urlRepository: mockURLRepository,
 			}
 
-			got, err := s.ShortenString(tt.args.url)
+			got, err := s.ShortenURL(tt.args.url)
 			assert.Equal(t, tt.wantErr, err)
 			assert.IsType(t, "String", got)
 		})

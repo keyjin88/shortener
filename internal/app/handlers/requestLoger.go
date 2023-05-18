@@ -13,9 +13,9 @@ type (
 		size   int
 	}
 
-	// добавляем реализацию http.ResponseWriter
+	// добавляем реализацию gin.ResponseWriter
 	loggingResponseWriter struct {
-		gin.ResponseWriter // встраиваем оригинальный http.ResponseWriter
+		gin.ResponseWriter // встраиваем оригинальный gin.ResponseWriter
 		responseData       *responseData
 	}
 )

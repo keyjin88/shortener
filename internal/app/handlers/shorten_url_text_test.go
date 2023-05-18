@@ -78,7 +78,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockService := mocks.NewMockShortenService(ctrl)
-			mockService.EXPECT().ShortenString(tt.url).
+			mockService.EXPECT().ShortenURL(tt.url).
 				Times(tt.shortenStringCall).
 				Return(tt.serviceReturn.result, tt.serviceReturn.error)
 
@@ -94,8 +94,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 				shortener: mockService,
 				config:    config.NewConfig(),
 			}
-			h.ShortenURL(mockRequestContext)
-
+			h.shortenURLText(mockRequestContext)
 		})
 	}
 }

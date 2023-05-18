@@ -31,5 +31,5 @@ func (h *Handler) shortenURLJSON(c RequestContext) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, ShortenURLResponse{Result: h.config.BaseAddress + "/" + result})
+	c.JSON(http.StatusCreated, ShortenURLResponse{Result: h.config.BaseAddress + "/" + result})
 }

@@ -1,7 +1,9 @@
 package handlers
 
 import (
+	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 type ShortenURLRequest struct {
@@ -14,14 +16,20 @@ type ShortenURLResponse struct {
 
 func (h *Handler) shortenURLJSON(c RequestContext) {
 	var req ShortenURLRequest
-	if err := c.ShouldBind(&req); err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+	requestBytes, err := c.GetRawData()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	jsonErr := json.Unmarshal(requestBytes, &req)
+	if jsonErr != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": jsonErr.Error()})
 		return
 	}
 	result, err := h.shortener.ShortenURL(req.URL)
 	if err != nil {
-		c.JSON(500, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(200, ShortenURLResponse{Result: h.config.BaseAddress + "/" + result})
+	c.JSON(http.StatusOK, ShortenURLResponse{Result: h.config.BaseAddress + "/" + result})
 }

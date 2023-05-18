@@ -6,7 +6,7 @@ import (
 	"net/url"
 )
 
-func (h *Handler) shortenURLText(c RequestContext) {
+func (h *Handler) ShortenURLText(c RequestContext) {
 	c.Header("Content-Type", "text/plain")
 	requestBytes, err := c.GetRawData()
 	if err != nil {

@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
+	"github.com/keyjin88/shortener/internal/app/logger"
 	"net/http"
 )
 
@@ -14,7 +15,7 @@ type ShortenURLResponse struct {
 	Result string `json:"result"`
 }
 
-func (h *Handler) shortenURLJSON(c RequestContext) {
+func (h *Handler) ShortenURLJSON(c RequestContext) {
 	var req ShortenURLRequest
 	requestBytes, err := c.GetRawData()
 	if err != nil {
@@ -31,5 +32,7 @@ func (h *Handler) shortenURLJSON(c RequestContext) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusCreated, ShortenURLResponse{Result: h.config.BaseAddress + "/" + result})
+	response := ShortenURLResponse{Result: h.config.BaseAddress + "/" + result}
+	logger.Log.Infof("Запрос на сокращение URL: %s, результат: %s", string(requestBytes), response.Result)
+	c.JSON(http.StatusCreated, response)
 }

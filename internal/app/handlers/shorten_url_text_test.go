@@ -97,7 +97,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 				shortener: mockService,
 				config:    config.NewConfig(),
 			}
-			h.shortenURLText(mockRequestContext)
+			h.ShortenURLText(mockRequestContext)
 		})
 	}
 }

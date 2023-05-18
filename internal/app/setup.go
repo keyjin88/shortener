@@ -46,6 +46,8 @@ func (api *API) setupRouter() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	router := gin.New()
+	router.Use(handlers.CompressionMiddleware())
+
 	//Использую стандартный логгер gin. В итоге нужно будет выбрать какой-то один
 	//router.Use(gin.Logger())
 	rootGroup := router.Group("/")

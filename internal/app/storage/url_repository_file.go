@@ -7,13 +7,13 @@ import (
 	"os"
 )
 
-type UrlJson struct {
+type URLJSON struct {
 	UUID        string `json:"uuid"`
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
 
-func SaveUrlJsonToFile(filePath string, data UrlJson) error {
+func SaveURLJSONToFile(filePath string, data URLJSON) error {
 	logger.Log.Infof("Saving to file: %s, data: %s", filePath, data)
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
@@ -22,14 +22,14 @@ func SaveUrlJsonToFile(filePath string, data UrlJson) error {
 	}
 	defer file.Close()
 
-	urlJsonAsBytes, err := json.Marshal(data)
+	urlJSONAsBytes, err := json.Marshal(data)
 	if err != nil {
 		logger.Log.Errorf("error marshalling data to json: %v", err)
 		return err
 	}
 	writer := bufio.NewWriter(file)
 	defer writer.Flush()
-	_, err = writer.Write(urlJsonAsBytes)
+	_, err = writer.Write(urlJSONAsBytes)
 	if err != nil {
 		logger.Log.Errorf("error writing to file: %v", err)
 		return err
@@ -54,7 +54,7 @@ func RestoreFromFile(filePath string) (map[string]string, error) {
 	result := make(map[string]string)
 	for scanner.Scan() {
 		line := scanner.Text()
-		var temp UrlJson
+		var temp URLJSON
 		err := json.Unmarshal([]byte(line), &temp)
 		if err != nil {
 			logger.Log.Errorf("can't open file: %v", err)

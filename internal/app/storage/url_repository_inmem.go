@@ -28,7 +28,7 @@ func init() {
 func (ur *URLRepositoryInMem) Create(shortURL string, url string) error {
 	inMemStorage[shortURL] = url
 	if ur.config.PathToStorageFile != "" {
-		err := SaveUrlJsonToFile(ur.config.PathToStorageFile, UrlJson{
+		err := SaveURLJSONToFile(ur.config.PathToStorageFile, URLJSON{
 			UUID:        strconv.Itoa(len(inMemStorage)),
 			OriginalURL: url,
 			ShortURL:    shortURL,

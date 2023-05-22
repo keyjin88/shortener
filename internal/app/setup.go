@@ -23,8 +23,7 @@ type API struct {
 // New is API constructor: build base API instance
 func New() *API {
 	return &API{
-		config:    config.NewConfig(),
-		shortener: service.NewShortenService(storage.NewURLRepositoryInMem()),
+		config: config.NewConfig(),
 	}
 }
 
@@ -34,6 +33,11 @@ func (api *API) Start() error {
 		return err
 	}
 	api.config.InitConfig()
+	err := api.configStorage()
+	if err != nil {
+		return err
+	}
+	api.configService()
 	api.configureHandlers()
 	api.setupRouter()
 
@@ -48,7 +52,7 @@ func (api *API) setupRouter() {
 	router := gin.New()
 	router.Use(handlers.CompressionMiddleware())
 
-	//Использую стандартный логгер gin. В итоге нужно будет выбрать какой-то один
+	//Раскомментировать для перехода на штатный логгер gin
 	//router.Use(gin.Logger())
 	rootGroup := router.Group("/")
 	{
@@ -64,4 +68,19 @@ func (api *API) setupRouter() {
 
 func (api *API) configureHandlers() {
 	api.handlers = handlers.NewHandler(api.shortener, api.config)
+}
+
+func (api *API) configStorage() error {
+	//передаем в репозиторий только необходимую часть конфига
+	api.urlRepository = storage.NewURLRepositoryInMem(api.config.FileStoragePath)
+	//пробуем восстановиться из файла
+	err := api.urlRepository.RestoreFromFile()
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (api *API) configService() {
+	api.shortener = service.NewShortenService(api.urlRepository)
 }

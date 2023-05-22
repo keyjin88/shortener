@@ -13,7 +13,10 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 		keyStr := randomUUID.String()[:8]
 		_, ok := s.GetShortenedURLByID(keyStr)
 		if !ok {
-			s.urlRepository.Create(keyStr, url)
+			err := s.urlRepository.Create(keyStr, url)
+			if err != nil {
+				return "", err
+			}
 			return keyStr, nil
 		}
 	}

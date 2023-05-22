@@ -7,10 +7,11 @@ import (
 )
 
 type Config struct {
-	ServerAddress  string `env:"SERVER_ADDRESS"`
-	BaseAddress    string `env:"BASE_URL"`
-	GinReleaseMode bool   `env:"GIN_MODE"`
-	LogLevel       string `env:"LOG_LEVEL"`
+	ServerAddress   string `env:"SERVER_ADDRESS"`
+	BaseAddress     string `env:"BASE_URL"`
+	GinReleaseMode  bool   `env:"GIN_MODE"`
+	LogLevel        string `env:"LOG_LEVEL"`
+	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 }
 
 func NewConfig() *Config {
@@ -24,6 +25,7 @@ func (config *Config) InitConfig() {
 	flag.StringVar(&config.BaseAddress, "b", "http://localhost:8080", "base address for shortened url")
 	flag.BoolVar(&config.GinReleaseMode, "grm", false, "gin release mode")
 	flag.StringVar(&config.LogLevel, "ll", "info", "log level")
+	flag.StringVar(&config.FileStoragePath, "f", "short-url-db.json", "path to storage")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()
 	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по уиолчанию из флагов

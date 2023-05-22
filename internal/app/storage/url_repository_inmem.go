@@ -48,7 +48,7 @@ func (ur *URLRepositoryInMem) FindByShortenedString(id string) (string, bool) {
 
 func (ur *URLRepositoryInMem) RestoreFromFile() error {
 	if ur.config.PathToStorageFile != "" {
-		result, err := ReadJSONFile(ur.config.PathToStorageFile)
+		result, err := RestoreFromFile(ur.config.PathToStorageFile)
 		if err != nil {
 			logger.Log.Errorf("error while restoring from file file: %v", err)
 			return err

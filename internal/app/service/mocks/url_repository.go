@@ -34,9 +34,11 @@ func (m *MockURLRepository) EXPECT() *MockURLRepositoryMockRecorder {
 }
 
 // Create mocks base method.
-func (m *MockURLRepository) Create(arg0, arg1 string) {
+func (m *MockURLRepository) Create(arg0, arg1 string) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "Create", arg0, arg1)
+	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Create indicates an expected call of Create.

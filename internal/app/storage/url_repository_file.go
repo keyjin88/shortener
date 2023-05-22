@@ -42,14 +42,9 @@ func SaveUrlJsonToFile(filePath string, data UrlJson) error {
 	return nil
 }
 
-func LoadFromFile(fileName string) map[string]string {
-	logger.Log.Infof("Loading from file: %s", fileName)
-	return make(map[string]string)
-}
-
-func ReadJSONFile(filePath string) (map[string]string, error) {
+func RestoreFromFile(filePath string) (map[string]string, error) {
 	logger.Log.Infof("restoring from file: %s", filePath)
-	file, err := os.Open(filePath)
+	file, err := os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
 		logger.Log.Errorf("can't open file: %v", err)
 		return nil, err

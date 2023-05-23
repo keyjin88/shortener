@@ -1,8 +1,4 @@
-package storage
-
-type Config struct {
-	PathToStorageFile string //путь до фпйла для резервного хранения
-}
+package file
 
 type URLJSON struct {
 	UUID        string `json:"uuid"`

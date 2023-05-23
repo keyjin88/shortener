@@ -8,7 +8,8 @@ import (
 	"github.com/keyjin88/shortener/internal/app/middleware/compressor"
 	logger2 "github.com/keyjin88/shortener/internal/app/middleware/logger"
 	"github.com/keyjin88/shortener/internal/app/service"
-	"github.com/keyjin88/shortener/internal/app/storage"
+	"github.com/keyjin88/shortener/internal/app/storage/file"
+	"github.com/keyjin88/shortener/internal/app/storage/inmem"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -18,7 +19,7 @@ type API struct {
 	config        *config.Config
 	router        *gin.Engine
 	shortener     *service.ShortenService
-	urlRepository *storage.URLRepositoryInMem
+	urlRepository *inmem.URLRepositoryInMem
 	handlers      *handlers.Handler
 }
 
@@ -71,14 +72,16 @@ func (api *API) configureHandlers() {
 
 func (api *API) configStorage() {
 	//передаем в репозиторий только необходимую часть конфига
-	api.urlRepository = storage.NewURLRepositoryInMem(api.config.FileStoragePath)
+	api.urlRepository = inmem.NewURLRepositoryInMem(api.config.FileStoragePath)
 	//пробуем восстановиться из файла
 	if api.config.FileStoragePath != "" {
-		err := api.urlRepository.RestoreDataFromFile(api.config.FileStoragePath)
+		data, err := file.RestoreFromFile(api.config.FileStoragePath)
 		if err != nil {
 			//Логируем ошибку и продолжаем работу
 			logger.Log.Errorf("error while restoring DB from file: %v", err)
+			return
 		}
+		api.urlRepository.RestoreData(data)
 	}
 }
 

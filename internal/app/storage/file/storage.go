@@ -1,4 +1,4 @@
-package storage
+package file
 
 import (
 	"bufio"
@@ -7,7 +7,7 @@ import (
 	"os"
 )
 
-func saveURLJSONToFile(filePath string, data URLJSON) error {
+func SaveURLJSONToFile(filePath string, data URLJSON) error {
 	logger.Log.Infof("Saving to file: %s, data: %s", filePath, data)
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
@@ -32,7 +32,7 @@ func saveURLJSONToFile(filePath string, data URLJSON) error {
 	return nil
 }
 
-func restoreFromFile(filePath string) (map[string]string, error) {
+func RestoreFromFile(filePath string) ([]URLJSON, error) {
 	logger.Log.Infof("restoring from file: %s", filePath)
 	file, err := os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {
@@ -40,7 +40,7 @@ func restoreFromFile(filePath string) (map[string]string, error) {
 	}
 	defer file.Close()
 	scanner := bufio.NewScanner(file)
-	result := make(map[string]string)
+	result := make([]URLJSON, 0)
 	for scanner.Scan() {
 		line := scanner.Text()
 		var temp URLJSON
@@ -48,7 +48,7 @@ func restoreFromFile(filePath string) (map[string]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		result[temp.ShortURL] = temp.OriginalURL
+		result = append(result, temp)
 	}
 	if err := scanner.Err(); err != nil {
 		return nil, err

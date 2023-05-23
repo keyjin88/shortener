@@ -5,6 +5,20 @@ import (
 	"strconv"
 )
 
+type URLRepositoryInMem struct {
+	config       Config
+	inMemStorage map[string]string
+}
+
+func NewURLRepositoryInMem(pathToStorageFile string) *URLRepositoryInMem {
+	return &URLRepositoryInMem{
+		config: Config{
+			PathToStorageFile: pathToStorageFile,
+		},
+		inMemStorage: make(map[string]string),
+	}
+}
+
 func (ur *URLRepositoryInMem) Create(shortURL string, url string) error {
 	ur.inMemStorage[shortURL] = url
 	if ur.config.PathToStorageFile != "" {

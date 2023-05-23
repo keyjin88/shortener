@@ -5,11 +5,3 @@ type URLRepository interface {
 	FindByShortenedString(id string) (string, bool)
 	Create(uuidStr string, url string) error
 }
-
-type ShortenService struct {
-	urlRepository URLRepository
-}
-
-func NewShortenService(urlRepository URLRepository) *ShortenService {
-	return &ShortenService{urlRepository: urlRepository}
-}

@@ -5,6 +5,18 @@ import (
 	"github.com/google/uuid"
 )
 
+type ShortenService struct {
+	urlRepository URLRepository
+}
+
+func NewShortenService(urlRepository URLRepository) *ShortenService {
+	return &ShortenService{urlRepository: urlRepository}
+}
+
+func (s *ShortenService) GetShortenedURLByID(id string) (string, bool) {
+	return s.urlRepository.FindByShortenedString(id)
+}
+
 func (s *ShortenService) ShortenURL(url string) (string, error) {
 	var attemptCounter = 0
 	var maxAttempts = 500

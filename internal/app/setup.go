@@ -5,8 +5,8 @@ import (
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers"
 	"github.com/keyjin88/shortener/internal/app/logger"
-	"github.com/keyjin88/shortener/internal/app/middleware"
 	"github.com/keyjin88/shortener/internal/app/middleware/compressor"
+	logger2 "github.com/keyjin88/shortener/internal/app/middleware/logger"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"go.uber.org/zap"
@@ -35,10 +35,7 @@ func (api *API) Start() error {
 		return err
 	}
 	api.config.InitConfig()
-	err := api.configStorage()
-	if err != nil {
-		return err
-	}
+	api.configStorage()
 	api.configService()
 	api.configureHandlers()
 	api.setupRouter()
@@ -53,7 +50,7 @@ func (api *API) setupRouter() {
 	}
 	router := gin.New()
 	router.Use(compressor.CompressionMiddleware())
-	router.Use(middleware.LoggingMiddleware())
+	router.Use(logger2.LoggingMiddleware())
 	//Раскомментировать для перехода на штатный логгер gin
 	//router.Use(gin.Logger())
 	rootGroup := router.Group("/")
@@ -72,15 +69,17 @@ func (api *API) configureHandlers() {
 	api.handlers = handlers.NewHandler(api.shortener, api.config)
 }
 
-func (api *API) configStorage() error {
+func (api *API) configStorage() {
 	//передаем в репозиторий только необходимую часть конфига
 	api.urlRepository = storage.NewURLRepositoryInMem(api.config.FileStoragePath)
 	//пробуем восстановиться из файла
-	err := api.urlRepository.RestoreFromFile()
-	if err != nil {
-		return err
+	if api.config.FileStoragePath != "" {
+		err := api.urlRepository.RestoreDataFromFile(api.config.FileStoragePath)
+		if err != nil {
+			//Логируем ошибку и продолжаем работу
+			logger.Log.Errorf("error while restoring DB from file: %v", err)
+		}
 	}
-	return nil
 }
 
 func (api *API) configService() {

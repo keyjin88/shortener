@@ -19,17 +19,20 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 	var req ShortenURLRequest
 	requestBytes, err := c.GetRawData()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.Log.Errorf("error while reading request: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while reading request"})
 		return
 	}
 	jsonErr := json.Unmarshal(requestBytes, &req)
 	if jsonErr != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": jsonErr.Error()})
+		logger.Log.Errorf("error while marshalling json data: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while marshalling json"})
 		return
 	}
 	result, err := h.shortener.ShortenURL(req.URL)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		logger.Log.Errorf("error while shortening url: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
 		return
 	}
 	response := ShortenURLResponse{Result: h.config.BaseAddress + "/" + result}

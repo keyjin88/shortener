@@ -1,12 +1,12 @@
 package storage
 
 import (
-	"github.com/keyjin88/shortener/internal/app/logger"
 	"strconv"
 )
 
 type URLRepositoryInMem struct {
-	config Config
+	config       Config
+	inMemStorage map[string]string
 }
 
 func NewURLRepositoryInMem(pathToStorageFile string) *URLRepositoryInMem {
@@ -14,27 +14,19 @@ func NewURLRepositoryInMem(pathToStorageFile string) *URLRepositoryInMem {
 		config: Config{
 			PathToStorageFile: pathToStorageFile,
 		},
+		inMemStorage: make(map[string]string),
 	}
 }
 
-var (
-	inMemStorage map[string]string
-)
-
-func init() {
-	inMemStorage = make(map[string]string)
-}
-
 func (ur *URLRepositoryInMem) Create(shortURL string, url string) error {
-	inMemStorage[shortURL] = url
+	ur.inMemStorage[shortURL] = url
 	if ur.config.PathToStorageFile != "" {
 		err := saveURLJSONToFile(ur.config.PathToStorageFile, URLJSON{
-			UUID:        strconv.Itoa(len(inMemStorage)),
+			UUID:        strconv.Itoa(len(ur.inMemStorage)),
 			OriginalURL: url,
 			ShortURL:    shortURL,
 		})
 		if err != nil {
-			logger.Log.Errorf("Error while saving to file: %v", err)
 			return err
 		}
 	}
@@ -42,20 +34,18 @@ func (ur *URLRepositoryInMem) Create(shortURL string, url string) error {
 }
 
 func (ur *URLRepositoryInMem) FindByShortenedString(id string) (string, bool) {
-	url, ok := inMemStorage[id]
+	url, ok := ur.inMemStorage[id]
 	return url, ok
 }
 
-func (ur *URLRepositoryInMem) RestoreFromFile() error {
-	if ur.config.PathToStorageFile != "" {
-		result, err := restoreFromFile(ur.config.PathToStorageFile)
-		if err != nil {
-			logger.Log.Errorf("error while restoring from file file: %v", err)
-			return err
-		}
-		inMemStorage = result
+// RestoreDataFromFile восстанавливает состояние БД из файла,
+// если произошла ошибка оставляем кеш пустым
+func (ur *URLRepositoryInMem) RestoreDataFromFile(filePath string) error {
+	result, err := restoreFromFile(filePath)
+	if err != nil {
+		return err
 	} else {
-		inMemStorage = make(map[string]string)
+		ur.inMemStorage = result
 	}
 	return nil
 }

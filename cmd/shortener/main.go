@@ -2,11 +2,11 @@ package main
 
 import (
 	"github.com/keyjin88/shortener/internal/app"
-	"log"
+	"github.com/keyjin88/shortener/internal/app/logger"
 )
 
 func main() {
 	server := app.New()
 	//api server start
-	log.Panicln(server.Start())
+	logger.Log.Panic(server.Start())
 }

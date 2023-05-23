@@ -1,33 +1,42 @@
 package service
 
 import (
+	"errors"
 	"github.com/google/uuid"
-	"github.com/keyjin88/shortener/internal/app/storage"
 )
 
 type ShortenService struct {
-	urlRepository storage.URLRepository
+	urlRepository URLRepository
 }
 
-func NewShortenService(urlRepository storage.URLRepository) *ShortenService {
+func NewShortenService(urlRepository URLRepository) *ShortenService {
 	return &ShortenService{urlRepository: urlRepository}
-}
-
-func (s *ShortenService) ShortenString(url string) (string, error) {
-	for {
-		u, err := uuid.NewRandom()
-		if err != nil {
-			return "", err
-		}
-		keyStr := u.String()[:8]
-		_, ok := s.GetShortenedURLByID(keyStr)
-		if !ok {
-			s.urlRepository.Create(keyStr, url)
-			return keyStr, nil
-		}
-	}
 }
 
 func (s *ShortenService) GetShortenedURLByID(id string) (string, bool) {
 	return s.urlRepository.FindByShortenedString(id)
+}
+
+func (s *ShortenService) ShortenURL(url string) (string, error) {
+	var attemptCounter = 0
+	var maxAttempts = 500
+	for {
+		randomUUID, err := uuid.NewRandom()
+		if err != nil {
+			return "", err
+		}
+		keyStr := randomUUID.String()[:8]
+		if _, ok := s.GetShortenedURLByID(keyStr); !ok {
+			err := s.urlRepository.Create(keyStr, url)
+			if err != nil {
+				return "", err
+			}
+			return keyStr, nil
+		} else {
+			if attemptCounter > maxAttempts {
+				return "", errors.New("too many attempts")
+			}
+			attemptCounter += 1
+		}
+	}
 }

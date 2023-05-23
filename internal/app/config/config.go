@@ -3,14 +3,15 @@ package config
 import (
 	"flag"
 	"github.com/caarlos0/env/v6"
-	"github.com/sirupsen/logrus"
 	"log"
 )
 
 type Config struct {
-	ServerAddress  string `env:"SERVER_ADDRESS"`
-	BaseAddress    string `env:"BASE_URL"`
-	GinReleaseMode bool   `env:"GIN_MODE"`
+	ServerAddress   string `env:"SERVER_ADDRESS"`
+	BaseAddress     string `env:"BASE_URL"`
+	GinReleaseMode  bool   `env:"GIN_MODE"`
+	LogLevel        string `env:"LOG_LEVEL"`
+	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 }
 
 func NewConfig() *Config {
@@ -23,6 +24,8 @@ func (config *Config) InitConfig() {
 	flag.StringVar(&config.ServerAddress, "a", "localhost:8080", "address and port to run server")
 	flag.StringVar(&config.BaseAddress, "b", "http://localhost:8080", "base address for shortened url")
 	flag.BoolVar(&config.GinReleaseMode, "grm", false, "gin release mode")
+	flag.StringVar(&config.LogLevel, "ll", "info", "log level")
+	flag.StringVar(&config.FileStoragePath, "f", "/tmp/short-url-db.json", "path to storage")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()
 	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по уиолчанию из флагов
@@ -30,6 +33,4 @@ func (config *Config) InitConfig() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	logrus.Infof("Starting server with configs: ServerAddress {%s}, BaseAddress {%s}\n", config.ServerAddress,
-		config.BaseAddress)
 }

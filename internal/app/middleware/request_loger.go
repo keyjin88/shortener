@@ -1,4 +1,4 @@
-package handlers
+package middleware
 
 import (
 	"github.com/gin-gonic/gin"
@@ -33,9 +33,9 @@ func (r *loggingResponseWriter) WriteHeader(statusCode int) {
 	r.responseData.status = statusCode // захватываем код статуса
 }
 
-// WithLogging добавляет дополнительный код для регистрации сведений о запросе
+// LoggingMiddleware добавляет дополнительный код для регистрации сведений о запросе
 // и возвращает новый gin.HandlerFunc.
-func WithLogging(f func(c RequestContext)) gin.HandlerFunc {
+func LoggingMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		start := time.Now()
 
@@ -48,7 +48,7 @@ func WithLogging(f func(c RequestContext)) gin.HandlerFunc {
 			responseData:   responseData,
 		}
 		c.Writer = &lw
-		f(c)
+		c.Next()
 		duration := time.Since(start)
 		logger.Log.Infoln(
 			"uri", c.Request.RequestURI,

@@ -5,6 +5,8 @@ import (
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers"
 	"github.com/keyjin88/shortener/internal/app/logger"
+	"github.com/keyjin88/shortener/internal/app/middleware"
+	"github.com/keyjin88/shortener/internal/app/middleware/compressor"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"go.uber.org/zap"
@@ -50,18 +52,18 @@ func (api *API) setupRouter() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	router := gin.New()
-	router.Use(handlers.CompressionMiddleware())
-
+	router.Use(compressor.CompressionMiddleware())
+	router.Use(middleware.LoggingMiddleware())
 	//Раскомментировать для перехода на штатный логгер gin
 	//router.Use(gin.Logger())
 	rootGroup := router.Group("/")
 	{
-		rootGroup.POST("", handlers.WithLogging(api.handlers.ShortenURLText))
-		rootGroup.GET(":id", handlers.WithLogging(api.handlers.GetShortenedURL))
+		rootGroup.POST("", func(c *gin.Context) { api.handlers.ShortenURLText(c) })
+		rootGroup.GET(":id", func(c *gin.Context) { api.handlers.GetShortenedURL(c) })
 	}
 	apiGroup := rootGroup.Group("/api")
 	{
-		apiGroup.POST("/shorten", handlers.WithLogging(api.handlers.ShortenURLJSON))
+		apiGroup.POST("/shorten", func(c *gin.Context) { api.handlers.ShortenURLJSON(c) })
 	}
 	api.router = router
 }

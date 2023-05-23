@@ -1,9 +1,7 @@
-package handlers
+package compressor
 
 import (
-	"compress/gzip"
 	"github.com/gin-gonic/gin"
-	"io"
 	"net/http"
 	"strings"
 )
@@ -13,30 +11,23 @@ func CompressionMiddleware() gin.HandlerFunc {
 		// Принимаем запросы в сжатом формате
 		encoding := c.GetHeader("Content-Encoding")
 		if strings.Contains(encoding, "gzip") {
-			gz, err := gzip.NewReader(c.Request.Body)
+			compressReader, err := newCompressReader(c.Request.Body)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			defer gz.Close()
-			body, err := io.ReadAll(gz)
-			if err != nil {
-				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-				return
-			}
-			c.Request.Body = io.NopCloser(strings.NewReader(string(body)))
+			defer compressReader.Close()
+			c.Request.Body = compressReader
 		}
 
 		acceptEncoding := c.GetHeader("Accept-Encoding")
 		supportsGzip := strings.Contains(acceptEncoding, "gzip")
 		if supportsGzip {
-			var writer io.Writer
 			switch c.Writer.Header().Get("Content-Type") {
 			case "application/json", "text/html":
-				writer = gzip.NewWriter(c.Writer)
-				defer writer.(*gzip.Writer).Close()
-			default:
-				writer = c.Writer
+				compressWriter := newCompressWriter(c.Writer)
+				compressWriter.writer.Header().Set("Content-Type", "gzip")
+				defer compressWriter.Close()
 			}
 			// Продолжаем обработку запроса
 			c.Next()

@@ -28,7 +28,7 @@ func init() {
 func (ur *URLRepositoryInMem) Create(shortURL string, url string) error {
 	inMemStorage[shortURL] = url
 	if ur.config.PathToStorageFile != "" {
-		err := SaveURLJSONToFile(ur.config.PathToStorageFile, URLJSON{
+		err := saveURLJSONToFile(ur.config.PathToStorageFile, URLJSON{
 			UUID:        strconv.Itoa(len(inMemStorage)),
 			OriginalURL: url,
 			ShortURL:    shortURL,
@@ -48,7 +48,7 @@ func (ur *URLRepositoryInMem) FindByShortenedString(id string) (string, bool) {
 
 func (ur *URLRepositoryInMem) RestoreFromFile() error {
 	if ur.config.PathToStorageFile != "" {
-		result, err := RestoreFromFile(ur.config.PathToStorageFile)
+		result, err := restoreFromFile(ur.config.PathToStorageFile)
 		if err != nil {
 			logger.Log.Errorf("error while restoring from file file: %v", err)
 			return err

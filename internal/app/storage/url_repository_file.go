@@ -13,7 +13,7 @@ type URLJSON struct {
 	OriginalURL string `json:"original_url"`
 }
 
-func SaveURLJSONToFile(filePath string, data URLJSON) error {
+func saveURLJSONToFile(filePath string, data URLJSON) error {
 	logger.Log.Infof("Saving to file: %s, data: %s", filePath, data)
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
@@ -42,7 +42,7 @@ func SaveURLJSONToFile(filePath string, data URLJSON) error {
 	return nil
 }
 
-func RestoreFromFile(filePath string) (map[string]string, error) {
+func restoreFromFile(filePath string) (map[string]string, error) {
 	logger.Log.Infof("restoring from file: %s", filePath)
 	file, err := os.OpenFile(filePath, os.O_RDONLY|os.O_CREATE, 0644)
 	if err != nil {

@@ -33,6 +33,18 @@ func (m *MockRequestContext) EXPECT() *MockRequestContextMockRecorder {
 	return m.recorder
 }
 
+// AbortWithStatus mocks base method.
+func (m *MockRequestContext) AbortWithStatus(arg0 int) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AbortWithStatus", arg0)
+}
+
+// AbortWithStatus indicates an expected call of AbortWithStatus.
+func (mr *MockRequestContextMockRecorder) AbortWithStatus(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AbortWithStatus", reflect.TypeOf((*MockRequestContext)(nil).AbortWithStatus), arg0)
+}
+
 // FullPath mocks base method.
 func (m *MockRequestContext) FullPath() string {
 	m.ctrl.T.Helper()

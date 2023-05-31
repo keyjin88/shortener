@@ -12,6 +12,7 @@ func (h *Handler) DbPing(c RequestContext) {
 	if err != nil {
 		logger.Log.Errorf("Unable to connect to database: %v", err)
 		c.AbortWithStatus(http.StatusInternalServerError)
+		return
 	} else {
 		c.String(http.StatusOK, "pong")
 	}

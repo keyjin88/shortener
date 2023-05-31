@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (h *Handler) DbPing(c RequestContext) {
+func (h *Handler) DBPing(c RequestContext) {
 	conn, err := pgx.Connect(context.Background(), h.config.DataBaseDSN)
 	if err != nil {
 		logger.Log.Errorf("Unable to connect to database: %v", err)

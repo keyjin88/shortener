@@ -58,7 +58,7 @@ func (api *API) setupRouter() {
 	{
 		rootGroup.POST("", func(c *gin.Context) { api.handlers.ShortenURLText(c) })
 		rootGroup.GET(":id", func(c *gin.Context) { api.handlers.GetShortenedURL(c) })
-		rootGroup.GET("ping", func(c *gin.Context) { api.handlers.DbPing(c) })
+		rootGroup.GET("ping", func(c *gin.Context) { api.handlers.DBPing(c) })
 	}
 	apiGroup := rootGroup.Group("/api")
 	{

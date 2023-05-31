@@ -15,6 +15,7 @@ type RequestContext interface {
 	ShouldBind(obj any) error
 	JSON(code int, obj any)
 	FullPath() string
+	AbortWithStatus(code int)
 }
 
 //go:generate mockgen -destination=mocks/shorten_srvice.go -package=mocks . ShortenService

@@ -6,7 +6,7 @@ import (
 	"github.com/keyjin88/shortener/internal/app/handlers"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"github.com/keyjin88/shortener/internal/app/middleware/compressor"
-	logger2 "github.com/keyjin88/shortener/internal/app/middleware/logger"
+	loggerMiddleware "github.com/keyjin88/shortener/internal/app/middleware/logger"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
@@ -51,13 +51,14 @@ func (api *API) setupRouter() {
 	}
 	router := gin.New()
 	router.Use(compressor.CompressionMiddleware())
-	router.Use(logger2.LoggingMiddleware())
+	router.Use(loggerMiddleware.LoggingMiddleware())
 	//Раскомментировать для перехода на штатный логгер gin
 	//router.Use(gin.Logger())
 	rootGroup := router.Group("/")
 	{
 		rootGroup.POST("", func(c *gin.Context) { api.handlers.ShortenURLText(c) })
 		rootGroup.GET(":id", func(c *gin.Context) { api.handlers.GetShortenedURL(c) })
+		rootGroup.GET("ping", func(c *gin.Context) { api.handlers.DbPing(c) })
 	}
 	apiGroup := rootGroup.Group("/api")
 	{

@@ -12,6 +12,7 @@ type Config struct {
 	GinReleaseMode  bool   `env:"GIN_MODE"`
 	LogLevel        string `env:"LOG_LEVEL"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH"`
+	DataBaseDSN     string `env:"DATABASE_DSN"`
 }
 
 func NewConfig() *Config {
@@ -26,6 +27,7 @@ func (config *Config) InitConfig() {
 	flag.BoolVar(&config.GinReleaseMode, "grm", false, "gin release mode")
 	flag.StringVar(&config.LogLevel, "ll", "info", "log level")
 	flag.StringVar(&config.FileStoragePath, "f", "/tmp/short-url-db.json", "path to storage")
+	flag.StringVar(&config.DataBaseDSN, "d", "postgres://pgadmin:postgres@localhost:5432/shortener", "database dsn")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()
 	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по уиолчанию из флагов

@@ -9,6 +9,8 @@ import (
 
 func TestShortenService_GetShortenedURLByID(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
 	type args struct {
 		id string
 	}
@@ -51,6 +53,8 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 
 func TestShortenService_ShortenString(t *testing.T) {
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
 	type args struct {
 		url string
 	}

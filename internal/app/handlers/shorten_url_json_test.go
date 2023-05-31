@@ -17,6 +17,7 @@ func TestHandler_shortenURLJSON(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
 	tests := []struct {
 		name               string

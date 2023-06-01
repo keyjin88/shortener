@@ -34,7 +34,8 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 			return "", err
 		}
 		keyStr := randomUUID.String()[:8]
-		if _, err := s.GetShortenedURLByID(keyStr); err == nil {
+		// Если не находим такой URl то сохраняем его в память и на диск, если такая опция активна
+		if _, err := s.GetShortenedURLByID(keyStr); err != nil {
 			shortURL, err := s.urlRepository.Save(keyStr, url)
 			if err != nil {
 				return "", err
@@ -48,7 +49,7 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 			return keyStr, nil
 		} else {
 			if attemptCounter > maxAttempts {
-				return "", errors.New("too many attempts")
+				return "", errors.New("too many attempts to generate short url")
 			}
 			attemptCounter += 1
 		}

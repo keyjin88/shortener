@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	storage "github.com/keyjin88/shortener/internal/app/storage"
 )
 
 // MockURLRepository is a mock of URLRepository interface.
@@ -49,11 +50,12 @@ func (mr *MockURLRepositoryMockRecorder) FindByShortenedURL(arg0 interface{}) *g
 }
 
 // Save mocks base method.
-func (m *MockURLRepository) Save(arg0, arg1 string) error {
+func (m *MockURLRepository) Save(arg0, arg1 string) (storage.ShortenedURL, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Save", arg0, arg1)
-	ret0, _ := ret[0].(error)
-	return ret0
+	ret0, _ := ret[0].(storage.ShortenedURL)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Save indicates an expected call of Save.

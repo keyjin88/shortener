@@ -77,7 +77,7 @@ func TestShortenService_ShortenString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return("any string", nil)
+			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return("any string", errors.New("not found url"))
 			mockURLRepository.EXPECT().Save(gomock.Any(), tt.args.url).Times(1)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,

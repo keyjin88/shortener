@@ -1,6 +1,7 @@
 package app
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers"
@@ -10,6 +11,7 @@ import (
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
+	"github.com/keyjin88/shortener/internal/app/storage/postgres"
 	"go.uber.org/zap"
 	"net/http"
 )
@@ -73,7 +75,12 @@ func (api *API) configureHandlers() {
 
 func (api *API) configStorage() {
 	if api.config.DataBaseDSN != "" {
-		//todo: инициализировать Postgres репу
+		repository, err := postgres.InitPgRepository(context.Background(), api.config.DataBaseDSN)
+		if err != nil {
+			logger.Log.Errorf("error while initialising DB: %v", err)
+			return
+		}
+		api.urlRepository = repository
 	} else {
 		//передаем в репозиторий только необходимую часть конфига
 		api.urlRepository = inmem.NewURLRepositoryInMem()

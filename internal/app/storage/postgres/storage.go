@@ -63,3 +63,7 @@ func (r *URLRepositoryPostgres) Save(shortURL string, url string) (storage.Short
 
 	return shortenedURL, nil
 }
+
+func (r *URLRepositoryPostgres) Close() {
+	r.dbPool.Close()
+}

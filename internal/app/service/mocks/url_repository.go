@@ -34,6 +34,18 @@ func (m *MockURLRepository) EXPECT() *MockURLRepositoryMockRecorder {
 	return m.recorder
 }
 
+// Close mocks base method.
+func (m *MockURLRepository) Close() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Close")
+}
+
+// Close indicates an expected call of Close.
+func (mr *MockURLRepositoryMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockURLRepository)(nil).Close))
+}
+
 // FindByShortenedURL mocks base method.
 func (m *MockURLRepository) FindByShortenedURL(arg0 string) (string, error) {
 	m.ctrl.T.Helper()

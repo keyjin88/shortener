@@ -43,6 +43,8 @@ func (api *API) Start() error {
 	api.configureHandlers()
 	api.setupRouter()
 
+	defer api.urlRepository.Close()
+
 	logger.Log.Infow("Running server", zap.String("address", api.config.ServerAddress))
 	return http.ListenAndServe(api.config.ServerAddress, api.router)
 }

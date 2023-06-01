@@ -10,4 +10,5 @@ type Config struct {
 type URLRepository interface {
 	FindByShortenedURL(shortURL string) (string, error)
 	Save(shortURL string, url string) (storage.ShortenedURL, error)
+	Close()
 }

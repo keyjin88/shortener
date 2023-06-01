@@ -40,3 +40,7 @@ func (ur *URLRepositoryInMem) RestoreData(data []storage.ShortenedURL) {
 		ur.inMemStorage[e.ShortURL] = e.OriginalURL
 	}
 }
+
+func (ur *URLRepositoryInMem) Close() {
+	//нужен для реализации интерфейса
+}

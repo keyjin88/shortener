@@ -34,11 +34,11 @@ func (m *MockShortenService) EXPECT() *MockShortenServiceMockRecorder {
 }
 
 // GetShortenedURLByID mocks base method.
-func (m *MockShortenService) GetShortenedURLByID(arg0 string) (string, bool) {
+func (m *MockShortenService) GetShortenedURLByID(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetShortenedURLByID", arg0)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(bool)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 

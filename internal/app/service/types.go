@@ -2,6 +2,6 @@ package service
 
 //go:generate mockgen -destination=mocks/url_repository.go -package=mocks . URLRepository
 type URLRepository interface {
-	FindByShortenedString(id string) (string, bool)
-	Create(uuidStr string, url string) error
+	FindByShortenedURL(shortURL string) (string, error)
+	Save(shortURL string, url string) error
 }

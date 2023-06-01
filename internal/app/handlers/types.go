@@ -18,9 +18,9 @@ type RequestContext interface {
 	AbortWithStatus(code int)
 }
 
-//go:generate mockgen -destination=mocks/shorten_srvice.go -package=mocks . ShortenService
+//go:generate mockgen -destination=mocks/shorten_service.go -package=mocks . ShortenService
 type ShortenService interface {
-	GetShortenedURLByID(id string) (string, bool)
+	GetShortenedURLByID(id string) (string, error)
 	ShortenURL(url string) (string, error)
 }
 

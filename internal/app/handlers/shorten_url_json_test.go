@@ -31,7 +31,7 @@ func TestHandler_shortenURLJSON(t *testing.T) {
 		expectedJSONCall   int
 	}{
 		{
-			name:              "Create successfully",
+			name:              "Save successfully",
 			url:               "https://www.yandex.ru",
 			getRowDataReturn:  getRowDataReturn{result: []byte(`{"url":"https://www.yandex.ru"}`), error: nil},
 			serviceReturn:     shortenURLReturn{result: "SHORTEN", error: nil},
@@ -61,7 +61,7 @@ func TestHandler_shortenURLJSON(t *testing.T) {
 			expectedJSONCall:  1,
 		},
 		{
-			name:              "Create successfully",
+			name:              "Save successfully",
 			url:               "https://www.yandex.ru",
 			getRowDataReturn:  getRowDataReturn{result: []byte(`{"url":"https://www.yandex.ru"}`), error: nil},
 			serviceReturn:     shortenURLReturn{result: "", error: errors.New("error from shorten service")},

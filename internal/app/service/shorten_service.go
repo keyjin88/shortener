@@ -13,8 +13,8 @@ func NewShortenService(urlRepository URLRepository) *ShortenService {
 	return &ShortenService{urlRepository: urlRepository}
 }
 
-func (s *ShortenService) GetShortenedURLByID(id string) (string, bool) {
-	return s.urlRepository.FindByShortenedString(id)
+func (s *ShortenService) GetShortenedURLByID(id string) (string, error) {
+	return s.urlRepository.FindByShortenedURL(id)
 }
 
 func (s *ShortenService) ShortenURL(url string) (string, error) {
@@ -26,8 +26,8 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 			return "", err
 		}
 		keyStr := randomUUID.String()[:8]
-		if _, ok := s.GetShortenedURLByID(keyStr); !ok {
-			err := s.urlRepository.Create(keyStr, url)
+		if _, err := s.GetShortenedURLByID(keyStr); err == nil {
+			err := s.urlRepository.Save(keyStr, url)
 			if err != nil {
 				return "", err
 			}

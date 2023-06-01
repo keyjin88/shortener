@@ -39,7 +39,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 		shortenStringCall  int
 	}{
 		{
-			name:               "Create successfully",
+			name:               "Save successfully",
 			url:                "https://ya.ru",
 			getRowDataReturn:   getRowDataReturn{result: []byte("https://ya.ru"), error: nil},
 			serviceReturn:      shortenURLReturn{result: "SHORTURL", error: nil},

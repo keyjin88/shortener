@@ -1,6 +1,7 @@
 package service
 
 import (
+	"errors"
 	"github.com/golang/mock/gomock"
 	"github.com/keyjin88/shortener/internal/app/service/mocks"
 	"github.com/stretchr/testify/assert"
@@ -15,38 +16,38 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 		id string
 	}
 	tests := []struct {
-		name  string
-		args  args
-		want  string
-		want1 bool
+		name    string
+		args    args
+		want    string
+		wantErr error
 	}{
 		{
 			name: "success",
 			args: args{
 				id: "SHORTSTRING",
 			},
-			want:  "https://example.com/1",
-			want1: true,
+			want:    "https://example.com/1",
+			wantErr: errors.New("test error"),
 		},
 		{
 			name: "not success",
 			args: args{
 				id: "SHORTSTRING",
 			},
-			want:  "",
-			want1: false,
+			want:    "",
+			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindByShortenedString(tt.args.id).Return(tt.want, tt.want1)
+			mockURLRepository.EXPECT().FindByShortenedURL(tt.args.id).Return(tt.want, tt.wantErr)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 			}
 			got, got1 := s.GetShortenedURLByID(tt.args.id)
 			assert.Equal(t, tt.want, got)
-			assert.Equal(t, tt.want1, got1)
+			assert.Equal(t, tt.wantErr, got1)
 		})
 	}
 }
@@ -76,8 +77,8 @@ func TestShortenService_ShortenString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindByShortenedString(gomock.Any()).Return("any string", false)
-			mockURLRepository.EXPECT().Create(gomock.Any(), tt.args.url).Times(1)
+			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return("any string", nil)
+			mockURLRepository.EXPECT().Save(gomock.Any(), tt.args.url).Times(1)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 			}

@@ -5,7 +5,3 @@ type ShortenedURL struct {
 	ShortURL    string `json:"short_url"`
 	OriginalURL string `json:"original_url"`
 }
-
-type Config struct {
-	PathToStorageFile string //путь до фпйла для резервного хранения
-}

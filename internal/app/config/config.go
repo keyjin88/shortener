@@ -30,7 +30,7 @@ func (config *Config) InitConfig() {
 	flag.StringVar(&config.DataBaseDSN, "d", "postgres://pgadmin:postgres@localhost:5432/shortener", "database dsn")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()
-	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по уиолчанию из флагов
+	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по умолчанию из флагов
 	err := env.Parse(config)
 	if err != nil {
 		log.Fatal(err)

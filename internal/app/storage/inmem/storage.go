@@ -3,37 +3,27 @@ package inmem
 import (
 	"errors"
 	"github.com/keyjin88/shortener/internal/app/storage"
-	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"strconv"
 )
 
 type URLRepositoryInMem struct {
-	config       storage.Config
 	inMemStorage map[string]string
 }
 
-func NewURLRepositoryInMem(pathToStorageFile string) *URLRepositoryInMem {
+func NewURLRepositoryInMem() *URLRepositoryInMem {
 	return &URLRepositoryInMem{
-		config: storage.Config{
-			PathToStorageFile: pathToStorageFile,
-		},
 		inMemStorage: make(map[string]string),
 	}
 }
 
-func (ur *URLRepositoryInMem) Save(shortURL string, url string) error {
+func (ur *URLRepositoryInMem) Save(shortURL string, url string) (storage.ShortenedURL, error) {
 	ur.inMemStorage[shortURL] = url
-	if ur.config.PathToStorageFile != "" {
-		err := file.SaveURLJSONToFile(ur.config.PathToStorageFile, storage.ShortenedURL{
-			UUID:        strconv.Itoa(len(ur.inMemStorage)),
-			OriginalURL: url,
-			ShortURL:    shortURL,
-		})
-		if err != nil {
-			return err
-		}
+	shortenedURL := storage.ShortenedURL{
+		UUID:        strconv.Itoa(len(ur.inMemStorage)),
+		OriginalURL: url,
+		ShortURL:    shortURL,
 	}
-	return nil
+	return shortenedURL, nil
 }
 
 func (ur *URLRepositoryInMem) FindByShortenedURL(shortURL string) (string, error) {

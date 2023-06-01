@@ -16,11 +16,11 @@ import (
 
 // API is the Base server instance description
 type API struct {
-	config        *config.Config
-	router        *gin.Engine
-	shortener     *service.ShortenService
-	urlRepository *inmem.URLRepositoryInMem
-	handlers      *handlers.Handler
+	config         *config.Config
+	router         *gin.Engine
+	shortenService *service.ShortenService
+	urlRepository  service.URLRepository
+	handlers       *handlers.Handler
 }
 
 // New is API constructor: build base API instance
@@ -68,24 +68,33 @@ func (api *API) setupRouter() {
 }
 
 func (api *API) configureHandlers() {
-	api.handlers = handlers.NewHandler(api.shortener, api.config)
+	api.handlers = handlers.NewHandler(api.shortenService, api.config)
 }
 
 func (api *API) configStorage() {
-	//передаем в репозиторий только необходимую часть конфига
-	api.urlRepository = inmem.NewURLRepositoryInMem(api.config.FileStoragePath)
-	//пробуем восстановиться из файла
-	if api.config.FileStoragePath != "" {
-		data, err := file.RestoreFromFile(api.config.FileStoragePath)
-		if err != nil {
-			//Логируем ошибку и продолжаем работу
-			logger.Log.Errorf("error while restoring DB from file: %v", err)
-			return
+	if api.config.DataBaseDSN != "" {
+		//todo: инициализировать Postgres репу
+	} else {
+		//передаем в репозиторий только необходимую часть конфига
+		api.urlRepository = inmem.NewURLRepositoryInMem()
+		//пробуем восстановиться из файла
+		if api.config.FileStoragePath != "" {
+			data, err := file.RestoreFromFile(api.config.FileStoragePath)
+			if err != nil {
+				//Логируем ошибку и продолжаем работу
+				logger.Log.Errorf("error while restoring DB from file: %v", err)
+				return
+			}
+			for _, shortenedURL := range data {
+				_, err := api.urlRepository.Save(shortenedURL.ShortURL, shortenedURL.OriginalURL)
+				if err != nil {
+					return
+				}
+			}
 		}
-		api.urlRepository.RestoreData(data)
 	}
 }
 
 func (api *API) configService() {
-	api.shortener = service.NewShortenService(api.urlRepository)
+	api.shortenService = service.NewShortenService(api.urlRepository, api.config.FileStoragePath)
 }

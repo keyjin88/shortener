@@ -12,7 +12,6 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
 	"github.com/keyjin88/shortener/internal/app/storage/postgres"
-	"go.uber.org/zap"
 	"net/http"
 )
 
@@ -45,14 +44,8 @@ func (api *API) Start() error {
 
 	defer api.urlRepository.Close()
 
-	logger.Log.Info("Running server",
-		zap.String("Address", api.config.ServerAddress),
-		zap.String("Base addres", api.config.BaseAddress),
-		zap.String("DB DSN", api.config.DataBaseDSN),
-		zap.Bool("Gin release mode", api.config.GinReleaseMode),
-		zap.String("Log level", api.config.LogLevel),
-		zap.String("Filestore path", api.config.LogLevel),
-	)
+	logger.Log.Infof("Running server. Address: %s |Base url: %s |DB DSN: %s |Gin release mode: %v |Log level: %s |Filestore path: %s",
+		api.config.ServerAddress, api.config.BaseAddress, api.config.DataBaseDSN, api.config.GinReleaseMode, api.config.LogLevel, api.config.FileStoragePath)
 	return http.ListenAndServe(api.config.ServerAddress, api.router)
 }
 

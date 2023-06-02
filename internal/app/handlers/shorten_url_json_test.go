@@ -7,6 +7,7 @@ import (
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers/mocks"
 	"github.com/keyjin88/shortener/internal/app/logger"
+	"github.com/keyjin88/shortener/internal/app/storage"
 	"net/http"
 	"testing"
 )
@@ -36,7 +37,7 @@ func TestHandler_shortenURLJSON(t *testing.T) {
 			getRowDataReturn:  getRowDataReturn{result: []byte(`{"url":"https://www.yandex.ru"}`), error: nil},
 			serviceReturn:     shortenURLReturn{result: "SHORTEN", error: nil},
 			expectedCode:      http.StatusCreated,
-			expectedBody:      ShortenURLResponse{Result: "/SHORTEN"},
+			expectedBody:      storage.ShortenURLResponse{Result: "/SHORTEN"},
 			shortenStringCall: 1,
 			expectedJSONCall:  1,
 		},

@@ -7,22 +7,29 @@ import (
 )
 
 type URLRepositoryInMem struct {
-	inMemStorage map[string]string
+	inMemStorage map[string]storage.ShortenedURL
 }
 
 func NewURLRepositoryInMem() *URLRepositoryInMem {
 	return &URLRepositoryInMem{
-		inMemStorage: make(map[string]string),
+		inMemStorage: make(map[string]storage.ShortenedURL),
 	}
 }
 
+func (ur *URLRepositoryInMem) SaveBatch(urls *[]storage.ShortenedURL) error {
+	for _, url := range *urls {
+		ur.inMemStorage[url.ShortURL] = url
+	}
+	return nil
+}
+
 func (ur *URLRepositoryInMem) Save(shortURL string, url string) (storage.ShortenedURL, error) {
-	ur.inMemStorage[shortURL] = url
 	shortenedURL := storage.ShortenedURL{
 		UUID:        strconv.Itoa(len(ur.inMemStorage)),
 		OriginalURL: url,
 		ShortURL:    shortURL,
 	}
+	ur.inMemStorage[shortURL] = shortenedURL
 	return shortenedURL, nil
 }
 
@@ -31,13 +38,13 @@ func (ur *URLRepositoryInMem) FindByShortenedURL(shortURL string) (string, error
 	if !ok {
 		return "", errors.New("URL not found: " + shortURL)
 	}
-	return url, nil
+	return url.OriginalURL, nil
 }
 
 // RestoreData восстанавливает состояние БД
 func (ur *URLRepositoryInMem) RestoreData(data []storage.ShortenedURL) {
 	for _, e := range data {
-		ur.inMemStorage[e.ShortURL] = e.OriginalURL
+		ur.inMemStorage[e.ShortURL] = e
 	}
 }
 

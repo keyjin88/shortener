@@ -67,6 +67,7 @@ func (api *API) setupRouter() {
 	apiGroup := rootGroup.Group("/api")
 	{
 		apiGroup.POST("/shorten", func(c *gin.Context) { api.handlers.ShortenURLJSON(c) })
+		apiGroup.POST("/shorten/batch", func(c *gin.Context) { api.handlers.ShortenURLBatch(c) })
 	}
 	api.router = router
 }

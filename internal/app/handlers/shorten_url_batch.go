@@ -8,27 +8,21 @@ import (
 	"net/http"
 )
 
-func (h *Handler) ShortenURLJSON(c RequestContext) {
-	var req storage.ShortenURLRequest
+func (h *Handler) ShortenURLBatch(c RequestContext) {
+	var req storage.ShortenURLBatchRequest
 	requestBytes, err := c.GetRawData()
 	if err != nil {
 		logger.Log.Infof("error while reading request: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while reading request"})
 		return
 	}
+
 	jsonErr := json.Unmarshal(requestBytes, &req)
 	if jsonErr != nil {
 		logger.Log.Infof("error while marshalling json data: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while marshalling json"})
 		return
 	}
-	result, err := h.shortener.ShortenURL(req.URL)
-	if err != nil {
-		logger.Log.Errorf("error while shortening url: %v", err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
-		return
-	}
-	response := storage.ShortenURLResponse{Result: h.config.BaseAddress + "/" + result}
-	logger.Log.Infof("Запрос на сокращение URL: %s, результат: %s", string(requestBytes), response.Result)
-	c.JSON(http.StatusCreated, response)
+	batch, err := h.shortener.ShortenURLBatch(req)
+	c.JSON(http.StatusOK, batch)
 }

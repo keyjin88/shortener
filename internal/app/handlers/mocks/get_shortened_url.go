@@ -45,6 +45,20 @@ func (mr *MockRequestContextMockRecorder) AbortWithStatus(arg0 interface{}) *gom
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AbortWithStatus", reflect.TypeOf((*MockRequestContext)(nil).AbortWithStatus), arg0)
 }
 
+// BindJSON mocks base method.
+func (m *MockRequestContext) BindJSON(arg0 interface{}) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BindJSON", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// BindJSON indicates an expected call of BindJSON.
+func (mr *MockRequestContextMockRecorder) BindJSON(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BindJSON", reflect.TypeOf((*MockRequestContext)(nil).BindJSON), arg0)
+}
+
 // FullPath mocks base method.
 func (m *MockRequestContext) FullPath() string {
 	m.ctrl.T.Helper()

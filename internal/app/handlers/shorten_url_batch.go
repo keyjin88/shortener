@@ -24,5 +24,5 @@ func (h *Handler) ShortenURLBatch(c RequestContext) {
 		return
 	}
 	batch, err := h.shortener.ShortenURLBatch(req)
-	c.JSON(http.StatusOK, batch)
+	c.JSON(http.StatusCreated, batch)
 }

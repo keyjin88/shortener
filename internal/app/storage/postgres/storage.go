@@ -2,6 +2,7 @@ package postgres
 
 import (
 	"context"
+	"database/sql"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"github.com/keyjin88/shortener/internal/app/storage"
@@ -38,10 +39,12 @@ func InitPgRepository(ctx context.Context, dataBaseDSN string) (*URLRepositoryPo
 
 func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (string, error) {
 	ctx := context.Background()
-	sql := `SELECT * FROM public.shortened_url WHERE short_url = $1`
+	query := `SELECT * FROM public.shortened_url WHERE short_url = $1`
 	shortenedURL := storage.ShortenedURL{}
-	err := r.dbPool.QueryRow(ctx, sql, shortURL).
-		Scan(&shortenedURL.ID, &shortenedURL.ShortURL, &shortenedURL.OriginalURL, &shortenedURL.CreatedAt, &shortenedURL.UpdatedAt, &shortenedURL.CorrelationID)
+	var correlationId sql.NullString
+	err := r.dbPool.QueryRow(ctx, query, shortURL).
+		Scan(&shortenedURL.ID, &shortenedURL.ShortURL, &shortenedURL.OriginalURL, &shortenedURL.CreatedAt, &shortenedURL.UpdatedAt, &correlationId)
+	shortenedURL.CorrelationID = correlationId.String
 	if err != nil {
 		return "", err
 	}
@@ -58,10 +61,10 @@ func (r *URLRepositoryPostgres) Save(shortURL string, url string) (storage.Short
 		ShortURL:    shortURL,
 		OriginalURL: url,
 	}
-	sql := `INSERT INTO shortened_url (created_at, updated_at, short_url, original_url)
+	query := `INSERT INTO shortened_url (created_at, updated_at, short_url, original_url)
 			VALUES ($1, $2, $3, $4)
 			RETURNING id;`
-	err := r.dbPool.QueryRow(ctx, sql, shortenedURL.CreatedAt, shortenedURL.UpdatedAt, shortenedURL.ShortURL, shortenedURL.OriginalURL).Scan(&shortenedURL.ID)
+	err := r.dbPool.QueryRow(ctx, query, shortenedURL.CreatedAt, shortenedURL.UpdatedAt, shortenedURL.ShortURL, shortenedURL.OriginalURL).Scan(&shortenedURL.ID)
 	if err != nil {
 		return storage.ShortenedURL{}, err
 	}

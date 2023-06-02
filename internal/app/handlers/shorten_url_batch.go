@@ -9,13 +9,6 @@ import (
 
 func (h *Handler) ShortenURLBatch(c RequestContext) {
 	var req storage.ShortenURLBatchRequest
-	//requestBytes, err := c.GetRawData()
-	//if err != nil {
-	//	logger.Log.Infof("error while reading request: %v", err)
-	//	c.JSON(http.StatusBadRequest, gin.H{"error": "Error while reading request"})
-	//	return
-	//}
-
 	jsonErr := c.BindJSON(&req)
 	if jsonErr != nil {
 		logger.Log.Infof("error while marshalling json data: %v", jsonErr)

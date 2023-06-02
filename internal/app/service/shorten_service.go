@@ -27,7 +27,10 @@ func (s *ShortenService) GetShortenedURLByID(id string) (string, error) {
 }
 
 func (s *ShortenService) ShortenURL(url string) (string, error) {
-	keyStr, err := s.generateShortenUrl(url)
+	keyStr, err := s.generateShortenURL(url)
+	if err != nil {
+		return "", err
+	}
 	shortURL, err := s.urlRepository.Save(keyStr, url)
 	if err != nil {
 		return "", err
@@ -45,17 +48,17 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest) ([]storage.ShortenURLBatchResponse, error) {
 	var urlArray []storage.ShortenedURL
 	for _, url := range request {
-		shortenUrl, err := s.generateShortenUrl(url.OriginalURL)
+		shortenURL, err := s.generateShortenURL(url.OriginalURL)
 		if err != nil {
 			return nil, err
 		}
-		shortenedUrl := storage.ShortenedURL{
+		shortenedURL := storage.ShortenedURL{
 			CreatedAt:     time.Now(),
 			OriginalURL:   url.OriginalURL,
-			ShortURL:      shortenUrl,
+			ShortURL:      shortenURL,
 			CorrelationID: url.CorrelationID,
 		}
-		urlArray = append(urlArray, shortenedUrl)
+		urlArray = append(urlArray, shortenedURL)
 	}
 
 	err := s.urlRepository.SaveBatch(&urlArray)
@@ -83,7 +86,7 @@ func (s *ShortenService) saveToFile(url storage.ShortenedURL, pathToSave string)
 	return nil
 }
 
-func (s *ShortenService) generateShortenUrl(originalURL string) (string, error) {
+func (s *ShortenService) generateShortenURL(originalURL string) (string, error) {
 	var attemptCounter = 0
 	var maxAttempts = 500
 	for {

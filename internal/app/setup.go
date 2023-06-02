@@ -45,7 +45,7 @@ func (api *API) Start() error {
 
 	defer api.urlRepository.Close()
 
-	logger.Log.Debug("Running server",
+	logger.Log.Info("Running server",
 		zap.String("Address", api.config.ServerAddress),
 		zap.String("Base addres", api.config.BaseAddress),
 		zap.String("DB DSN", api.config.DataBaseDSN),

@@ -9,7 +9,8 @@ import (
 )
 
 func SaveURLJSONToFile(filePath string, data storage.ShortenedURL) error {
-	logger.Log.Infof("Saving to file: %s, data: %s", filePath, data)
+	logger.Log.Infof("Saving to file: %s, data: UUID %s, short URL: %s, original URL: %s, correlation ID: %s",
+		filePath, data.UUID, data.ShortURL, data.OriginalURL, data.CorrelationID)
 	file, err := os.OpenFile(filePath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0644)
 	if err != nil {
 		return err

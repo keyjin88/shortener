@@ -3,6 +3,8 @@ package service
 import (
 	"errors"
 	"github.com/google/uuid"
+	"github.com/jackc/pgerrcode"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"time"
@@ -33,7 +35,16 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 	}
 	shortURL, err := s.urlRepository.Save(keyStr, url)
 	if err != nil {
-		return "", err
+		pgErr, ok := err.(*pgconn.PgError)
+		if ok && pgErr.Code == pgerrcode.UniqueViolation {
+			shortenedURL, err := s.urlRepository.FindByOriginalURL(url)
+			if err != nil {
+				return "", err
+			}
+			return shortenedURL, errors.New("URL already exists")
+		} else {
+			return "", err
+		}
 	}
 	if s.config.PathToStorageFile != "" {
 		err := s.saveToFile(shortURL, s.config.PathToStorageFile)

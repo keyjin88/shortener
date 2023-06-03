@@ -20,13 +20,11 @@ func InitPgRepository(ctx context.Context, dataBaseDSN string) (*URLRepositoryPo
 
 	query := `create table if not exists public.shortened_url
 (
-    id             serial
-        primary key,
+    id             serial primary key,
     short_url      varchar,
-    original_url   varchar,
-
-    created_at     date    not null,
-    updated_at     date    not null,
+    original_url   varchar unique,
+    created_at     date not null,
+    updated_at     date not null,
     correlation_id varchar
 );`
 	_, err = dbPool.Exec(ctx, query)
@@ -45,6 +43,17 @@ func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (string, err
 		return "", err
 	}
 	return originalURL, nil
+}
+
+func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, error) {
+	ctx := context.Background()
+	query := `SELECT short_url FROM public.shortened_url WHERE original_url = $1`
+	var shortURL string
+	err := r.dbPool.QueryRow(ctx, query, originalURL).Scan(&shortURL)
+	if err != nil {
+		return "", err
+	}
+	return shortURL, nil
 }
 
 func (r *URLRepositoryPostgres) Save(shortURL string, url string) (storage.ShortenedURL, error) {

@@ -35,6 +35,6 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 			return
 		}
 	}
-	logger.Log.Infof("Запрос на сокращение URL: %s, результат: %s", string(requestBytes), response.Result)
+	response := storage.ShortenURLResponse{Result: result}
 	c.JSON(http.StatusCreated, response)
 }

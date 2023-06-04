@@ -10,16 +10,12 @@ import (
 	"time"
 )
 
-type ShortenService struct {
-	urlRepository URLRepository
-	config        Config
-}
-
-func NewShortenService(urlRepository URLRepository, pathToStorageFile string) *ShortenService {
+func NewShortenService(urlRepository URLRepository, pathToStorageFile string, baseAddress string) *ShortenService {
 	return &ShortenService{
 		urlRepository: urlRepository,
-		config: Config{
+		config: &Config{
 			PathToStorageFile: pathToStorageFile,
+			BaseAddress:       baseAddress,
 		},
 	}
 }
@@ -29,7 +25,7 @@ func (s *ShortenService) GetShortenedURLByID(id string) (string, error) {
 }
 
 func (s *ShortenService) ShortenURL(url string) (string, error) {
-	keyStr, err := s.generateShortenURL(url)
+	keyStr, err := s.generateShortenURL()
 	if err != nil {
 		return "", err
 	}
@@ -53,13 +49,13 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 		}
 	}
 
-	return shortURL.ShortURL, err
+	return s.config.BaseAddress + "/" + shortURL.ShortURL, err
 }
 
 func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest) ([]storage.ShortenURLBatchResponse, error) {
 	var urlArray []storage.ShortenedURL
 	for _, url := range request {
-		shortenURL, err := s.generateShortenURL(url.OriginalURL)
+		shortenURL, err := s.generateShortenURL()
 		if err != nil {
 			return nil, err
 		}
@@ -84,7 +80,9 @@ func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest)
 				return nil, err
 			}
 		}
-		result = append(result, storage.ShortenURLBatchResponse{CorrelationID: url.CorrelationID, ShortURL: url.ShortURL})
+		result = append(result, storage.ShortenURLBatchResponse{
+			CorrelationID: url.CorrelationID,
+			ShortURL:      s.config.BaseAddress + "/" + url.ShortURL})
 	}
 	return result, nil
 }
@@ -97,7 +95,7 @@ func (s *ShortenService) saveToFile(url storage.ShortenedURL, pathToSave string)
 	return nil
 }
 
-func (s *ShortenService) generateShortenURL(originalURL string) (string, error) {
+func (s *ShortenService) generateShortenURL() (string, error) {
 	var attemptCounter = 0
 	var maxAttempts = 500
 	for {

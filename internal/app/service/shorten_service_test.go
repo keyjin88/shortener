@@ -81,6 +81,7 @@ func TestShortenService_ShortenString(t *testing.T) {
 			mockURLRepository.EXPECT().Save(gomock.Any(), tt.args.url).Times(1)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
+				config:        &Config{PathToStorageFile: ""},
 			}
 
 			got, err := s.ShortenURL(tt.args.url)

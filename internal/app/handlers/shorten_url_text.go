@@ -23,7 +23,7 @@ func (h *Handler) ShortenURLText(c RequestContext) {
 	shortenURL, err := h.shortener.ShortenURL(uri.String())
 	if err != nil {
 		if err.Error() == "URL already exists" {
-			c.String(http.StatusConflict, h.config.BaseAddress+"/"+shortenString)
+			c.String(http.StatusConflict, shortenURL)
 			return
 		} else {
 			logger.Log.Error("Trouble while shortening url. Error while shortener.ShortenString() :", err)

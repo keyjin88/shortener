@@ -46,6 +46,21 @@ func (mr *MockURLRepositoryMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockURLRepository)(nil).Close))
 }
 
+// FindByOriginalURL mocks base method.
+func (m *MockURLRepository) FindByOriginalURL(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByOriginalURL", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByOriginalURL indicates an expected call of FindByOriginalURL.
+func (mr *MockURLRepositoryMockRecorder) FindByOriginalURL(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByOriginalURL", reflect.TypeOf((*MockURLRepository)(nil).FindByOriginalURL), arg0)
+}
+
 // FindByShortenedURL mocks base method.
 func (m *MockURLRepository) FindByShortenedURL(arg0 string) (string, error) {
 	m.ctrl.T.Helper()

@@ -23,7 +23,7 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 		return
 	}
 	result, err := h.shortener.ShortenURL(req.URL)
-	response := storage.ShortenURLResponse{Result: h.config.BaseAddress + "/" + result}
+	response := storage.ShortenURLResponse{Result: result}
 	if err != nil {
 		if err.Error() == "URL already exists" {
 			logger.Log.Errorf("error while shortening url: %v", err)
@@ -35,6 +35,5 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 			return
 		}
 	}
-	response := storage.ShortenURLResponse{Result: result}
 	c.JSON(http.StatusCreated, response)
 }

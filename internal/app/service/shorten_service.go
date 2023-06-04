@@ -37,7 +37,7 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 			if err != nil {
 				return "", err
 			}
-			return shortenedURL, errors.New("URL already exists")
+			return s.config.BaseAddress + "/" + shortenedURL, errors.New("URL already exists")
 		} else {
 			return "", err
 		}

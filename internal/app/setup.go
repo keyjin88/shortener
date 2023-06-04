@@ -73,7 +73,7 @@ func (api *API) setupRouter() {
 }
 
 func (api *API) configureHandlers() {
-	api.handlers = handlers.NewHandler(api.shortenService, api.config)
+	api.handlers = handlers.NewHandler(api.shortenService)
 }
 
 func (api *API) configStorage() {
@@ -106,5 +106,5 @@ func (api *API) configStorage() {
 }
 
 func (api *API) configService() {
-	api.shortenService = service.NewShortenService(api.urlRepository, api.config.FileStoragePath)
+	api.shortenService = service.NewShortenService(api.urlRepository, api.config.FileStoragePath, api.config.BaseAddress)
 }

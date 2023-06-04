@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage"
 )
@@ -29,9 +28,8 @@ type ShortenService interface {
 
 type Handler struct {
 	shortener ShortenService
-	config    *config.Config
 }
 
-func NewHandler(shortener *service.ShortenService, config *config.Config) *Handler {
-	return &Handler{shortener: shortener, config: config}
+func NewHandler(shortener *service.ShortenService) *Handler {
+	return &Handler{shortener: shortener}
 }

@@ -28,7 +28,6 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
 		return
 	}
-	response := storage.ShortenURLResponse{Result: h.config.BaseAddress + "/" + result}
-	logger.Log.Infof("Запрос на сокращение URL: %s, результат: %s", string(requestBytes), response.Result)
+	response := storage.ShortenURLResponse{Result: result}
 	c.JSON(http.StatusCreated, response)
 }

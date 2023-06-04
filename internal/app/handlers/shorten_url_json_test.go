@@ -4,7 +4,6 @@ import (
 	"errors"
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"
-	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers/mocks"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"github.com/keyjin88/shortener/internal/app/storage"
@@ -35,7 +34,7 @@ func TestHandler_shortenURLJSON(t *testing.T) {
 			name:              "Save successfully",
 			url:               "https://www.yandex.ru",
 			getRowDataReturn:  getRowDataReturn{result: []byte(`{"url":"https://www.yandex.ru"}`), error: nil},
-			serviceReturn:     shortenURLReturn{result: "SHORTEN", error: nil},
+			serviceReturn:     shortenURLReturn{result: "/SHORTEN", error: nil},
 			expectedCode:      http.StatusCreated,
 			expectedBody:      storage.ShortenURLResponse{Result: "/SHORTEN"},
 			shortenStringCall: 1,
@@ -88,7 +87,7 @@ func TestHandler_shortenURLJSON(t *testing.T) {
 
 			h := &Handler{
 				shortener: mockService,
-				config:    config.NewConfig(),
+				config:    &Config{},
 			}
 			h.ShortenURLJSON(mockRequestContext)
 		})

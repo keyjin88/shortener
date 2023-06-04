@@ -73,7 +73,7 @@ func (api *API) setupRouter() {
 }
 
 func (api *API) configureHandlers() {
-	api.handlers = handlers.NewHandler(api.shortenService)
+	api.handlers = handlers.NewHandler(api.shortenService, api.config.DataBaseDSN)
 }
 
 func (api *API) configStorage() {

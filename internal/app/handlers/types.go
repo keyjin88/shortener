@@ -28,8 +28,13 @@ type ShortenService interface {
 
 type Handler struct {
 	shortener ShortenService
+	config    *Config
 }
 
-func NewHandler(shortener *service.ShortenService) *Handler {
-	return &Handler{shortener: shortener}
+type Config struct {
+	DataBaseDSN string
+}
+
+func NewHandler(shortener *service.ShortenService, dataBaseDSN string) *Handler {
+	return &Handler{shortener: shortener, config: &Config{DataBaseDSN: dataBaseDSN}}
 }

@@ -4,7 +4,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers/mocks"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"net/http"
@@ -69,7 +68,7 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 
 			h := &Handler{
 				shortener: mockService,
-				config:    config.NewConfig(),
+				config:    &Config{},
 			}
 			h.GetShortenedURL(mockRequestContext)
 		})

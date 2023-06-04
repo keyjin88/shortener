@@ -14,7 +14,6 @@ func (h *Handler) GetShortenedURL(context RequestContext) {
 		context.String(http.StatusBadRequest, fmt.Sprintf("URL not found by id: %s", id))
 		return
 	} else {
-		logger.Log.Infof("Запрос на получение URL по id: %s, originalURL: %s", id, originalURL)
 		context.Redirect(http.StatusTemporaryRedirect, originalURL)
 		return
 	}

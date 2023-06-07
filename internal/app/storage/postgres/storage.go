@@ -13,11 +13,6 @@ type URLRepositoryPostgres struct {
 }
 
 func InitPgRepository(pool *pgxpool.Pool, ctx context.Context) (*URLRepositoryPostgres, error) {
-	//dbPool, err := pgxpool.New(ctx, dataBaseDSN)
-	//if err != nil {
-	//	return nil, err
-	//}
-
 	query := `create table if not exists public.shortened_url
 (
     id             serial primary key,

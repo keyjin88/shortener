@@ -58,7 +58,7 @@ func (ur *URLRepositoryInMem) Close() {
 	//нужен для реализации интерфейса
 }
 
-func (r *URLRepositoryInMem) Ping() error {
+func (ur *URLRepositoryInMem) Ping() error {
 	//нужен для реализации интерфейса
 	return nil
 }

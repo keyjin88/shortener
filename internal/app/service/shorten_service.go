@@ -29,7 +29,11 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	shortURL, err := s.urlRepository.Save(keyStr, url)
+	shortURL := storage.ShortenedURL{
+		ShortURL:    keyStr,
+		OriginalURL: url,
+	}
+	err = s.urlRepository.Save(&shortURL)
 	if err != nil {
 		pgErr, ok := err.(*pgconn.PgError)
 		if ok && pgErr.Code == pgerrcode.UniqueViolation {
@@ -114,4 +118,8 @@ func (s *ShortenService) generateShortenURL() (string, error) {
 			attemptCounter += 1
 		}
 	}
+}
+
+func (s *ShortenService) PingDB() error {
+	return s.urlRepository.Ping()
 }

@@ -68,7 +68,6 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 
 			h := &Handler{
 				shortener: mockService,
-				config:    &Config{},
 			}
 			h.GetShortenedURL(mockRequestContext)
 		})

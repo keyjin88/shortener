@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers"
 	"github.com/keyjin88/shortener/internal/app/logger"
@@ -73,12 +74,17 @@ func (api *API) setupRouter() {
 }
 
 func (api *API) configureHandlers() {
-	api.handlers = handlers.NewHandler(api.shortenService, api.config.DataBaseDSN)
+	api.handlers = handlers.NewHandler(api.shortenService, api.urlRepository)
 }
 
 func (api *API) configStorage() {
 	if api.config.DataBaseDSN != "" {
-		repository, err := postgres.InitPgRepository(context.Background(), api.config.DataBaseDSN)
+		dbPool, err := pgxpool.New(context.Background(), api.config.DataBaseDSN)
+		if err != nil {
+			logger.Log.Errorf("error while initialising DB Pool: %v", err)
+			return
+		}
+		repository, err := postgres.InitPgRepository(dbPool, context.Background())
 		if err != nil {
 			logger.Log.Errorf("error while initialising DB: %v", err)
 			return
@@ -96,7 +102,7 @@ func (api *API) configStorage() {
 				return
 			}
 			for _, shortenedURL := range data {
-				_, err := api.urlRepository.Save(shortenedURL.ShortURL, shortenedURL.OriginalURL)
+				err := api.urlRepository.Save(&shortenedURL)
 				if err != nil {
 					return
 				}

@@ -58,7 +58,8 @@ func TestShortenService_ShortenString(t *testing.T) {
 	defer ctrl.Finish()
 
 	type args struct {
-		url string
+		serviceArgs         string
+		repositoryCallCount int
 	}
 	tests := []struct {
 		name    string
@@ -69,7 +70,8 @@ func TestShortenService_ShortenString(t *testing.T) {
 		{
 			name: "success",
 			args: args{
-				url: "https://example.com/1",
+				serviceArgs:         "https://example.com/1",
+				repositoryCallCount: 1,
 			},
 			want:    "SHORTSTRING",
 			wantErr: nil,
@@ -79,13 +81,13 @@ func TestShortenService_ShortenString(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
 			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return("any string", errors.New("not found url"))
-			mockURLRepository.EXPECT().Save(gomock.Any(), tt.args.url).Times(1)
+			mockURLRepository.EXPECT().Save(gomock.Any()).Times(tt.args.repositoryCallCount)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 				config:        &Config{PathToStorageFile: ""},
 			}
 
-			got, err := s.ShortenURL(tt.args.url)
+			got, err := s.ShortenURL(tt.args.serviceArgs)
 			assert.Equal(t, tt.wantErr, err)
 			assert.IsType(t, "String", got)
 		})

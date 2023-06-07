@@ -12,11 +12,11 @@ type URLRepositoryPostgres struct {
 	dbPool *pgxpool.Pool
 }
 
-func InitPgRepository(ctx context.Context, dataBaseDSN string) (*URLRepositoryPostgres, error) {
-	dbPool, err := pgxpool.New(ctx, dataBaseDSN)
-	if err != nil {
-		return nil, err
-	}
+func InitPgRepository(pool *pgxpool.Pool, ctx context.Context) (*URLRepositoryPostgres, error) {
+	//dbPool, err := pgxpool.New(ctx, dataBaseDSN)
+	//if err != nil {
+	//	return nil, err
+	//}
 
 	query := `create table if not exists public.shortened_url
 (
@@ -27,11 +27,11 @@ func InitPgRepository(ctx context.Context, dataBaseDSN string) (*URLRepositoryPo
     updated_at     date not null,
     correlation_id varchar
 );`
-	_, err = dbPool.Exec(ctx, query)
+	_, err := pool.Exec(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	return &URLRepositoryPostgres{dbPool: dbPool}, nil
+	return &URLRepositoryPostgres{dbPool: pool}, nil
 }
 
 func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (string, error) {
@@ -56,24 +56,21 @@ func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, e
 	return shortURL, nil
 }
 
-func (r *URLRepositoryPostgres) Save(shortURL string, url string) (storage.ShortenedURL, error) {
+func (r *URLRepositoryPostgres) Save(shortenedURL *storage.ShortenedURL) error {
 	ctx := context.Background()
 	now := time.Now()
-	shortenedURL := storage.ShortenedURL{
-		CreatedAt:   now,
-		UpdatedAt:   now,
-		ShortURL:    shortURL,
-		OriginalURL: url,
-	}
+	shortenedURL.CreatedAt = now
+	shortenedURL.UpdatedAt = now
+
 	query := `INSERT INTO shortened_url (created_at, updated_at, short_url, original_url)
 			VALUES ($1, $2, $3, $4)
 			RETURNING id;`
 	err := r.dbPool.QueryRow(ctx, query, shortenedURL.CreatedAt, shortenedURL.UpdatedAt, shortenedURL.ShortURL, shortenedURL.OriginalURL).Scan(&shortenedURL.ID)
 	if err != nil {
-		return storage.ShortenedURL{}, err
+		return err
 	}
 
-	return shortenedURL, nil
+	return nil
 }
 
 func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
@@ -111,4 +108,8 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 
 func (r *URLRepositoryPostgres) Close() {
 	r.dbPool.Close()
+}
+
+func (r *URLRepositoryPostgres) Ping() error {
+	return r.dbPool.Ping(context.Background())
 }

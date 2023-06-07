@@ -26,15 +26,18 @@ type ShortenService interface {
 	ShortenURLBatch(request storage.ShortenURLBatchRequest) ([]storage.ShortenURLBatchResponse, error)
 }
 
+type ConnectionChecker interface {
+	Ping() error
+}
+
 type Handler struct {
-	shortener ShortenService
-	config    *Config
+	shortener         ShortenService
+	connectionChecker ConnectionChecker
 }
 
-type Config struct {
-	DataBaseDSN string
-}
-
-func NewHandler(shortener *service.ShortenService, dataBaseDSN string) *Handler {
-	return &Handler{shortener: shortener, config: &Config{DataBaseDSN: dataBaseDSN}}
+func NewHandler(shortener *service.ShortenService, connChecker ConnectionChecker) *Handler {
+	return &Handler{
+		shortener:         shortener,
+		connectionChecker: connChecker,
+	}
 }

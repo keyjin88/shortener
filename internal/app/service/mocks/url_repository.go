@@ -76,19 +76,32 @@ func (mr *MockURLRepositoryMockRecorder) FindByShortenedURL(arg0 interface{}) *g
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByShortenedURL", reflect.TypeOf((*MockURLRepository)(nil).FindByShortenedURL), arg0)
 }
 
-// Save mocks base method.
-func (m *MockURLRepository) Save(arg0, arg1 string) (storage.ShortenedURL, error) {
+// Ping mocks base method.
+func (m *MockURLRepository) Ping() error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Save", arg0, arg1)
-	ret0, _ := ret[0].(storage.ShortenedURL)
-	ret1, _ := ret[1].(error)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Ping")
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Ping indicates an expected call of Ping.
+func (mr *MockURLRepositoryMockRecorder) Ping() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockURLRepository)(nil).Ping))
+}
+
+// Save mocks base method.
+func (m *MockURLRepository) Save(arg0 *storage.ShortenedURL) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Save", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // Save indicates an expected call of Save.
-func (mr *MockURLRepositoryMockRecorder) Save(arg0, arg1 interface{}) *gomock.Call {
+func (mr *MockURLRepositoryMockRecorder) Save(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockURLRepository)(nil).Save), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockURLRepository)(nil).Save), arg0)
 }
 
 // SaveBatch mocks base method.

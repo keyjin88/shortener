@@ -26,14 +26,13 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 	response := storage.ShortenURLResponse{Result: result}
 	if err != nil {
 		if err.Error() == "URL already exists" {
-			logger.Log.Errorf("error while shortening url: %v", err)
+			logger.Log.Infof("error while shortening url: %v", err)
 			c.JSON(http.StatusConflict, response)
 			return
-		} else {
-			logger.Log.Errorf("error while shortening url: %v", err)
-			c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
-			return
 		}
+		logger.Log.Infof("error while shortening url: %v", err)
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
+		return
 	}
 	c.JSON(http.StatusCreated, response)
 }

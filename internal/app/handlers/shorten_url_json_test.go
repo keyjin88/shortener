@@ -87,7 +87,6 @@ func TestHandler_shortenURLJSON(t *testing.T) {
 
 			h := &Handler{
 				shortener: mockService,
-				config:    &Config{},
 			}
 			h.ShortenURLJSON(mockRequestContext)
 		})

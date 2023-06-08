@@ -8,8 +8,7 @@ type ShortenService struct {
 }
 
 type Config struct {
-	PathToStorageFile string //путь до фпйла для резервного хранения
-	BaseAddress       string //base address for shortened url
+	BaseAddress string //base address for shortened url
 }
 
 //go:generate mockgen -destination=mocks/url_repository.go -package=mocks . URLRepository

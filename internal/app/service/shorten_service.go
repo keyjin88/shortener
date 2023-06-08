@@ -6,16 +6,14 @@ import (
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/keyjin88/shortener/internal/app/storage"
-	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"time"
 )
 
-func NewShortenService(urlRepository URLRepository, pathToStorageFile string, baseAddress string) *ShortenService {
+func NewShortenService(urlRepository URLRepository, baseAddress string) *ShortenService {
 	return &ShortenService{
 		urlRepository: urlRepository,
 		config: &Config{
-			PathToStorageFile: pathToStorageFile,
-			BaseAddress:       baseAddress,
+			BaseAddress: baseAddress,
 		},
 	}
 }
@@ -46,12 +44,6 @@ func (s *ShortenService) ShortenURL(url string) (string, error) {
 			return "", err
 		}
 	}
-	if s.config.PathToStorageFile != "" {
-		err := s.saveToFile(shortURL, s.config.PathToStorageFile)
-		if err != nil {
-			return "", err
-		}
-	}
 
 	return s.config.BaseAddress + "/" + shortURL.ShortURL, err
 }
@@ -78,25 +70,11 @@ func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest)
 	}
 	var result []storage.ShortenURLBatchResponse
 	for _, url := range urlArray {
-		if s.config.PathToStorageFile != "" {
-			err := s.saveToFile(url, s.config.PathToStorageFile)
-			if err != nil {
-				return nil, err
-			}
-		}
 		result = append(result, storage.ShortenURLBatchResponse{
 			CorrelationID: url.CorrelationID,
 			ShortURL:      s.config.BaseAddress + "/" + url.ShortURL})
 	}
 	return result, nil
-}
-
-func (s *ShortenService) saveToFile(url storage.ShortenedURL, pathToSave string) error {
-	err := file.SaveURLJSONToFile(pathToSave, url)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func (s *ShortenService) generateShortenURL() (string, error) {

@@ -84,33 +84,24 @@ func (api *API) configStorage() {
 			logger.Log.Errorf("error while initialising DB Pool: %v", err)
 			return
 		}
-		repository, err := postgres.InitPgRepository(dbPool, context.Background())
+		repository, err := postgres.NewPostgresRepository(dbPool, context.Background())
+		if err != nil {
+			logger.Log.Errorf("error while initialising DB: %v", err)
+			return
+		}
+		api.urlRepository = repository
+	} else if api.config.FileStoragePath != "" {
+		repository, err := file.NewURLRepositoryFile(&api.config.FileStoragePath)
 		if err != nil {
 			logger.Log.Errorf("error while initialising DB: %v", err)
 			return
 		}
 		api.urlRepository = repository
 	} else {
-		//передаем в репозиторий только необходимую часть конфига
 		api.urlRepository = inmem.NewURLRepositoryInMem()
-		//пробуем восстановиться из файла
-		if api.config.FileStoragePath != "" {
-			data, err := file.RestoreFromFile(api.config.FileStoragePath)
-			if err != nil {
-				//Логируем ошибку и продолжаем работу
-				logger.Log.Errorf("error while restoring DB from file: %v", err)
-				return
-			}
-			for _, shortenedURL := range data {
-				err := api.urlRepository.Save(&shortenedURL)
-				if err != nil {
-					return
-				}
-			}
-		}
 	}
 }
 
 func (api *API) configService() {
-	api.shortenService = service.NewShortenService(api.urlRepository, api.config.FileStoragePath, api.config.BaseAddress)
+	api.shortenService = service.NewShortenService(api.urlRepository, api.config.BaseAddress)
 }

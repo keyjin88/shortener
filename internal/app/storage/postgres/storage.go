@@ -12,7 +12,7 @@ type URLRepositoryPostgres struct {
 	dbPool *pgxpool.Pool
 }
 
-func InitPgRepository(pool *pgxpool.Pool, ctx context.Context) (*URLRepositoryPostgres, error) {
+func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context) (*URLRepositoryPostgres, error) {
 	query := `create table if not exists public.shortened_url
 (
     id             serial primary key,

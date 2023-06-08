@@ -4,19 +4,12 @@ import (
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/keyjin88/shortener/internal/app/logger"
+	"github.com/keyjin88/shortener/internal/app/storage"
 	"net/http"
 )
 
-type ShortenURLRequest struct {
-	URL string `json:"url"`
-}
-
-type ShortenURLResponse struct {
-	Result string `json:"result"`
-}
-
 func (h *Handler) ShortenURLJSON(c RequestContext) {
-	var req ShortenURLRequest
+	var req storage.ShortenURLRequest
 	requestBytes, err := c.GetRawData()
 	if err != nil {
 		logger.Log.Infof("error while reading request: %v", err)
@@ -30,12 +23,16 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 		return
 	}
 	result, err := h.shortener.ShortenURL(req.URL)
+	response := storage.ShortenURLResponse{Result: result}
 	if err != nil {
-		logger.Log.Errorf("error while shortening url: %v", err)
+		if err.Error() == "URL already exists" {
+			logger.Log.Infof("error while shortening url: %v", err)
+			c.JSON(http.StatusConflict, response)
+			return
+		}
+		logger.Log.Infof("error while shortening url: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
 		return
 	}
-	response := ShortenURLResponse{Result: h.config.BaseAddress + "/" + result}
-	logger.Log.Infof("Запрос на сокращение URL: %s, результат: %s", string(requestBytes), response.Result)
 	c.JSON(http.StatusCreated, response)
 }

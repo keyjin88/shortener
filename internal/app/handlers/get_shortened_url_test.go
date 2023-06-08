@@ -1,9 +1,9 @@
 package handlers
 
 import (
+	"errors"
 	"fmt"
 	"github.com/golang/mock/gomock"
-	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers/mocks"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"net/http"
@@ -12,7 +12,7 @@ import (
 
 type getShortenURLReturn struct {
 	result string
-	ok     bool
+	error  error
 }
 
 func TestHandler_GetShortenedURLWithMock(t *testing.T) {
@@ -21,6 +21,7 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
 	tests := []struct {
 		name                 string
@@ -36,7 +37,7 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 			name:                 "Get successfully",
 			shortenURL:           "ShortenURL",
 			originalURL:          "https://www.test.ru",
-			serviceReturn:        getShortenURLReturn{result: "https://www.test.ru", ok: true},
+			serviceReturn:        getShortenURLReturn{result: "https://www.test.ru", error: nil},
 			expectedRedirectCall: 1,
 			expectedStringCall:   0,
 			expectedCode:         http.StatusTemporaryRedirect,
@@ -44,7 +45,7 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 		{
 			name:                 "URL not found",
 			shortenURL:           "ShortenURL",
-			serviceReturn:        getShortenURLReturn{result: "", ok: false},
+			serviceReturn:        getShortenURLReturn{result: "", error: errors.New("test error")},
 			expectedCode:         http.StatusBadRequest,
 			expectedRedirectCall: 0,
 			expectedStringCall:   1,
@@ -55,7 +56,7 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockService := mocks.NewMockShortenService(ctrl)
 			mockService.EXPECT().GetShortenedURLByID(tt.shortenURL).
-				Return(tt.serviceReturn.result, tt.serviceReturn.ok)
+				Return(tt.serviceReturn.result, tt.serviceReturn.error)
 
 			mockRequestContext := mocks.NewMockRequestContext(ctrl)
 			mockRequestContext.EXPECT().Param("id").
@@ -67,7 +68,6 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 
 			h := &Handler{
 				shortener: mockService,
-				config:    config.NewConfig(),
 			}
 			h.GetShortenedURL(mockRequestContext)
 		})

@@ -1,26 +1,28 @@
 package app
 
 import (
+	"context"
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"github.com/keyjin88/shortener/internal/app/middleware/compressor"
-	logger2 "github.com/keyjin88/shortener/internal/app/middleware/logger"
+	loggerMiddleware "github.com/keyjin88/shortener/internal/app/middleware/logger"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
-	"go.uber.org/zap"
+	"github.com/keyjin88/shortener/internal/app/storage/postgres"
 	"net/http"
 )
 
 // API is the Base server instance description
 type API struct {
-	config        *config.Config
-	router        *gin.Engine
-	shortener     *service.ShortenService
-	urlRepository *inmem.URLRepositoryInMem
-	handlers      *handlers.Handler
+	config         *config.Config
+	router         *gin.Engine
+	shortenService *service.ShortenService
+	urlRepository  service.URLRepository
+	handlers       *handlers.Handler
 }
 
 // New is API constructor: build base API instance
@@ -41,7 +43,10 @@ func (api *API) Start() error {
 	api.configureHandlers()
 	api.setupRouter()
 
-	logger.Log.Infow("Running server", zap.String("address", api.config.ServerAddress))
+	defer api.urlRepository.Close()
+
+	logger.Log.Infof("Running server. Address: %s |Base url: %s |DB DSN: %s |Gin release mode: %v |Log level: %s |Filestore path: %s",
+		api.config.ServerAddress, api.config.BaseAddress, api.config.DataBaseDSN, api.config.GinReleaseMode, api.config.LogLevel, api.config.FileStoragePath)
 	return http.ListenAndServe(api.config.ServerAddress, api.router)
 }
 
@@ -51,40 +56,52 @@ func (api *API) setupRouter() {
 	}
 	router := gin.New()
 	router.Use(compressor.CompressionMiddleware())
-	router.Use(logger2.LoggingMiddleware())
+	router.Use(loggerMiddleware.LoggingMiddleware())
 	//Раскомментировать для перехода на штатный логгер gin
 	//router.Use(gin.Logger())
 	rootGroup := router.Group("/")
 	{
 		rootGroup.POST("", func(c *gin.Context) { api.handlers.ShortenURLText(c) })
 		rootGroup.GET(":id", func(c *gin.Context) { api.handlers.GetShortenedURL(c) })
+		rootGroup.GET("ping", func(c *gin.Context) { api.handlers.DBPing(c) })
 	}
 	apiGroup := rootGroup.Group("/api")
 	{
 		apiGroup.POST("/shorten", func(c *gin.Context) { api.handlers.ShortenURLJSON(c) })
+		apiGroup.POST("/shorten/batch", func(c *gin.Context) { api.handlers.ShortenURLBatch(c) })
 	}
 	api.router = router
 }
 
 func (api *API) configureHandlers() {
-	api.handlers = handlers.NewHandler(api.shortener, api.config)
+	api.handlers = handlers.NewHandler(api.shortenService, api.urlRepository)
 }
 
 func (api *API) configStorage() {
-	//передаем в репозиторий только необходимую часть конфига
-	api.urlRepository = inmem.NewURLRepositoryInMem(api.config.FileStoragePath)
-	//пробуем восстановиться из файла
-	if api.config.FileStoragePath != "" {
-		data, err := file.RestoreFromFile(api.config.FileStoragePath)
+	if api.config.DataBaseDSN != "" {
+		dbPool, err := pgxpool.New(context.Background(), api.config.DataBaseDSN)
 		if err != nil {
-			//Логируем ошибку и продолжаем работу
-			logger.Log.Errorf("error while restoring DB from file: %v", err)
+			logger.Log.Errorf("error while initialising DB Pool: %v", err)
 			return
 		}
-		api.urlRepository.RestoreData(data)
+		repository, err := postgres.NewPostgresRepository(dbPool, context.Background())
+		if err != nil {
+			logger.Log.Errorf("error while initialising DB: %v", err)
+			return
+		}
+		api.urlRepository = repository
+	} else if api.config.FileStoragePath != "" {
+		repository, err := file.NewURLRepositoryFile(&api.config.FileStoragePath)
+		if err != nil {
+			logger.Log.Errorf("error while initialising DB: %v", err)
+			return
+		}
+		api.urlRepository = repository
+	} else {
+		api.urlRepository = inmem.NewURLRepositoryInMem()
 	}
 }
 
 func (api *API) configService() {
-	api.shortener = service.NewShortenService(api.urlRepository)
+	api.shortenService = service.NewShortenService(api.urlRepository, api.config.BaseAddress)
 }

@@ -20,12 +20,15 @@ func (h *Handler) ShortenURLText(c RequestContext) {
 		c.String(http.StatusBadRequest, "Invalid url string.")
 		return
 	}
-	shortenString, err := h.shortener.ShortenURL(uri.String())
+	shortenURL, err := h.shortener.ShortenURL(uri.String())
 	if err != nil {
-		logger.Log.Error("Trouble while shortening url. Error while shortener.ShortenString() :", err)
+		if err.Error() == "URL already exists" {
+			c.String(http.StatusConflict, shortenURL)
+			return
+		}
+		logger.Log.Infof("Trouble while shortening url. Error while shortener.ShortenString() :", err)
 		c.String(http.StatusBadRequest, "Trouble while shortening url.")
 		return
 	}
-	logger.Log.Infof("Запрос на сокращение URL: %s, результат: %s", string(requestBytes), shortenString)
-	c.String(http.StatusCreated, h.config.BaseAddress+"/"+shortenString)
+	c.String(http.StatusCreated, shortenURL)
 }

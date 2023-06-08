@@ -5,9 +5,11 @@
 package mocks
 
 import (
+	context "context"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	storage "github.com/keyjin88/shortener/internal/app/storage"
 )
 
 // MockURLRepository is a mock of URLRepository interface.
@@ -33,31 +35,86 @@ func (m *MockURLRepository) EXPECT() *MockURLRepositoryMockRecorder {
 	return m.recorder
 }
 
-// Create mocks base method.
-func (m *MockURLRepository) Create(arg0, arg1 string) error {
+// Close mocks base method.
+func (m *MockURLRepository) Close() {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Create", arg0, arg1)
+	m.ctrl.Call(m, "Close")
+}
+
+// Close indicates an expected call of Close.
+func (mr *MockURLRepositoryMockRecorder) Close() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockURLRepository)(nil).Close))
+}
+
+// FindByOriginalURL mocks base method.
+func (m *MockURLRepository) FindByOriginalURL(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByOriginalURL", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByOriginalURL indicates an expected call of FindByOriginalURL.
+func (mr *MockURLRepositoryMockRecorder) FindByOriginalURL(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByOriginalURL", reflect.TypeOf((*MockURLRepository)(nil).FindByOriginalURL), arg0)
+}
+
+// FindByShortenedURL mocks base method.
+func (m *MockURLRepository) FindByShortenedURL(arg0 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindByShortenedURL", arg0)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindByShortenedURL indicates an expected call of FindByShortenedURL.
+func (mr *MockURLRepositoryMockRecorder) FindByShortenedURL(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByShortenedURL", reflect.TypeOf((*MockURLRepository)(nil).FindByShortenedURL), arg0)
+}
+
+// Ping mocks base method.
+func (m *MockURLRepository) Ping(arg0 context.Context) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Ping", arg0)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
-// Create indicates an expected call of Create.
-func (mr *MockURLRepositoryMockRecorder) Create(arg0, arg1 interface{}) *gomock.Call {
+// Ping indicates an expected call of Ping.
+func (mr *MockURLRepositoryMockRecorder) Ping(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Create", reflect.TypeOf((*MockURLRepository)(nil).Create), arg0, arg1)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Ping", reflect.TypeOf((*MockURLRepository)(nil).Ping), arg0)
 }
 
-// FindByShortenedString mocks base method.
-func (m *MockURLRepository) FindByShortenedString(arg0 string) (string, bool) {
+// Save mocks base method.
+func (m *MockURLRepository) Save(arg0 *storage.ShortenedURL) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindByShortenedString", arg0)
-	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(bool)
-	return ret0, ret1
+	ret := m.ctrl.Call(m, "Save", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
-// FindByShortenedString indicates an expected call of FindByShortenedString.
-func (mr *MockURLRepositoryMockRecorder) FindByShortenedString(arg0 interface{}) *gomock.Call {
+// Save indicates an expected call of Save.
+func (mr *MockURLRepositoryMockRecorder) Save(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindByShortenedString", reflect.TypeOf((*MockURLRepository)(nil).FindByShortenedString), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Save", reflect.TypeOf((*MockURLRepository)(nil).Save), arg0)
+}
+
+// SaveBatch mocks base method.
+func (m *MockURLRepository) SaveBatch(arg0 *[]storage.ShortenedURL) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveBatch", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// SaveBatch indicates an expected call of SaveBatch.
+func (mr *MockURLRepositoryMockRecorder) SaveBatch(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveBatch", reflect.TypeOf((*MockURLRepository)(nil).SaveBatch), arg0)
 }

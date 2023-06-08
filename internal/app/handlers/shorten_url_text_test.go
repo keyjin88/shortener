@@ -3,7 +3,6 @@ package handlers
 import (
 	"errors"
 	"github.com/golang/mock/gomock"
-	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers/mocks"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"net/http"
@@ -26,6 +25,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 		t.Fatal(err)
 	}
 	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
 
 	tests := []struct {
 		name               string
@@ -38,10 +38,10 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 		shortenStringCall  int
 	}{
 		{
-			name:               "Create successfully",
+			name:               "Save successfully",
 			url:                "https://ya.ru",
 			getRowDataReturn:   getRowDataReturn{result: []byte("https://ya.ru"), error: nil},
-			serviceReturn:      shortenURLReturn{result: "SHORTURL", error: nil},
+			serviceReturn:      shortenURLReturn{result: "/SHORTURL", error: nil},
 			expectedCode:       http.StatusCreated,
 			expectedBody:       "/SHORTURL",
 			expectedStringCall: 1,
@@ -95,7 +95,6 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 
 			h := &Handler{
 				shortener: mockService,
-				config:    config.NewConfig(),
 			}
 			h.ShortenURLText(mockRequestContext)
 		})

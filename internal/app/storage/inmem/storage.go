@@ -1,47 +1,65 @@
 package inmem
 
 import (
-	"github.com/keyjin88/shortener/internal/app/storage/file"
+	"context"
+	"errors"
+	"fmt"
+	"github.com/keyjin88/shortener/internal/app/storage"
 	"strconv"
 )
 
 type URLRepositoryInMem struct {
-	config       Config
-	inMemStorage map[string]string
+	inMemStorage map[string]storage.ShortenedURL
 }
 
-func NewURLRepositoryInMem(pathToStorageFile string) *URLRepositoryInMem {
+func NewURLRepositoryInMem() *URLRepositoryInMem {
 	return &URLRepositoryInMem{
-		config: Config{
-			PathToStorageFile: pathToStorageFile,
-		},
-		inMemStorage: make(map[string]string),
+		inMemStorage: make(map[string]storage.ShortenedURL),
 	}
 }
 
-func (ur *URLRepositoryInMem) Create(shortURL string, url string) error {
-	ur.inMemStorage[shortURL] = url
-	if ur.config.PathToStorageFile != "" {
-		err := file.SaveURLJSONToFile(ur.config.PathToStorageFile, file.URLJSON{
-			UUID:        strconv.Itoa(len(ur.inMemStorage)),
-			OriginalURL: url,
-			ShortURL:    shortURL,
-		})
-		if err != nil {
-			return err
-		}
+func (ur *URLRepositoryInMem) SaveBatch(urls *[]storage.ShortenedURL) error {
+	for _, url := range *urls {
+		ur.inMemStorage[url.ShortURL] = url
 	}
 	return nil
 }
 
-func (ur *URLRepositoryInMem) FindByShortenedString(id string) (string, bool) {
-	url, ok := ur.inMemStorage[id]
-	return url, ok
+func (ur *URLRepositoryInMem) Save(shortenedURL *storage.ShortenedURL) error {
+	shortenedURL.UUID = strconv.Itoa(len(ur.inMemStorage))
+	ur.inMemStorage[shortenedURL.ShortURL] = *shortenedURL
+	return nil
+}
+
+func (ur *URLRepositoryInMem) FindByShortenedURL(shortURL string) (string, error) {
+	url, ok := ur.inMemStorage[shortURL]
+	if !ok {
+		return "", fmt.Errorf("URL not found: %v", shortURL)
+	}
+	return url.OriginalURL, nil
+}
+
+func (ur *URLRepositoryInMem) FindByOriginalURL(originalURL string) (string, error) {
+	for key, value := range ur.inMemStorage {
+		if value.OriginalURL == originalURL {
+			return key, nil
+		}
+	}
+	return "", errors.New("URL not found: " + originalURL)
 }
 
 // RestoreData восстанавливает состояние БД
-func (ur *URLRepositoryInMem) RestoreData(data []file.URLJSON) {
+func (ur *URLRepositoryInMem) RestoreData(data []storage.ShortenedURL) {
 	for _, e := range data {
-		ur.inMemStorage[e.ShortURL] = e.OriginalURL
+		ur.inMemStorage[e.ShortURL] = e
 	}
+}
+
+func (ur *URLRepositoryInMem) Close() {
+	//нужен для реализации интерфейса
+}
+
+func (ur *URLRepositoryInMem) Ping(ctx context.Context) error {
+	//нужен для реализации интерфейса
+	return nil
 }

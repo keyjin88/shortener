@@ -8,6 +8,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	storage "github.com/keyjin88/shortener/internal/app/storage"
 )
 
 // MockShortenService is a mock of ShortenService interface.
@@ -34,11 +35,11 @@ func (m *MockShortenService) EXPECT() *MockShortenServiceMockRecorder {
 }
 
 // GetShortenedURLByID mocks base method.
-func (m *MockShortenService) GetShortenedURLByID(arg0 string) (string, bool) {
+func (m *MockShortenService) GetShortenedURLByID(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetShortenedURLByID", arg0)
 	ret0, _ := ret[0].(string)
-	ret1, _ := ret[1].(bool)
+	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
@@ -61,4 +62,19 @@ func (m *MockShortenService) ShortenURL(arg0 string) (string, error) {
 func (mr *MockShortenServiceMockRecorder) ShortenURL(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenURL", reflect.TypeOf((*MockShortenService)(nil).ShortenURL), arg0)
+}
+
+// ShortenURLBatch mocks base method.
+func (m *MockShortenService) ShortenURLBatch(arg0 storage.ShortenURLBatchRequest) ([]storage.ShortenURLBatchResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ShortenURLBatch", arg0)
+	ret0, _ := ret[0].([]storage.ShortenURLBatchResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ShortenURLBatch indicates an expected call of ShortenURLBatch.
+func (mr *MockShortenServiceMockRecorder) ShortenURLBatch(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenURLBatch", reflect.TypeOf((*MockShortenService)(nil).ShortenURLBatch), arg0)
 }

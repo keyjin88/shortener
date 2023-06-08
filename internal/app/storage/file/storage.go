@@ -19,11 +19,6 @@ func NewURLRepositoryFile(filePath *string) (*URLRepositoryFile, error) {
 		logger.Log.Infof("error while opening file: %v", err)
 		return nil, err
 	}
-	if err != nil {
-		//Логируем ошибку и продолжаем работу
-		logger.Log.Infof("error while restoring DB from file: %v", err)
-		return nil, err
-	}
 	urlRepositoryFile := URLRepositoryFile{file: file}
 	return &urlRepositoryFile, nil
 }

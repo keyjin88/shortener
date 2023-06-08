@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"database/sql/driver"
 	"github.com/keyjin88/shortener/internal/app/service"
 	"github.com/keyjin88/shortener/internal/app/storage"
 )
@@ -26,18 +27,14 @@ type ShortenService interface {
 	ShortenURLBatch(request storage.ShortenURLBatchRequest) ([]storage.ShortenURLBatchResponse, error)
 }
 
-type ConnectionChecker interface {
-	Ping() error
-}
-
 type Handler struct {
-	shortener         ShortenService
-	connectionChecker ConnectionChecker
+	shortener ShortenService
+	pinger    driver.Pinger
 }
 
-func NewHandler(shortener *service.ShortenService, connChecker ConnectionChecker) *Handler {
+func NewHandler(shortener *service.ShortenService, pinger driver.Pinger) *Handler {
 	return &Handler{
-		shortener:         shortener,
-		connectionChecker: connChecker,
+		shortener: shortener,
+		pinger:    pinger,
 	}
 }

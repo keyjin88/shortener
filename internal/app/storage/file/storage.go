@@ -2,6 +2,7 @@ package file
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"github.com/keyjin88/shortener/internal/app/logger"
@@ -114,7 +115,7 @@ func (r *URLRepositoryFile) Close() {
 	}
 }
 
-func (r *URLRepositoryFile) Ping() error {
+func (r *URLRepositoryFile) Ping(ctx context.Context) error {
 	if _, err := os.Stat(r.file.Name()); os.IsNotExist(err) {
 		return fmt.Errorf("file not found: %s", r.file.Name())
 	} else {

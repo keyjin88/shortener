@@ -1,6 +1,7 @@
 package inmem
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"github.com/keyjin88/shortener/internal/app/storage"
@@ -58,7 +59,7 @@ func (ur *URLRepositoryInMem) Close() {
 	//нужен для реализации интерфейса
 }
 
-func (ur *URLRepositoryInMem) Ping() error {
+func (ur *URLRepositoryInMem) Ping(ctx context.Context) error {
 	//нужен для реализации интерфейса
 	return nil
 }

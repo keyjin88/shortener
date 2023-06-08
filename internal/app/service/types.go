@@ -1,6 +1,9 @@
 package service
 
-import "github.com/keyjin88/shortener/internal/app/storage"
+import (
+	"context"
+	"github.com/keyjin88/shortener/internal/app/storage"
+)
 
 type ShortenService struct {
 	urlRepository URLRepository
@@ -18,5 +21,5 @@ type URLRepository interface {
 	Save(*storage.ShortenedURL) error
 	SaveBatch(urls *[]storage.ShortenedURL) error
 	Close()
-	Ping() error
+	Ping(ctx context.Context) error
 }

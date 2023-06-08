@@ -105,6 +105,6 @@ func (r *URLRepositoryPostgres) Close() {
 	r.dbPool.Close()
 }
 
-func (r *URLRepositoryPostgres) Ping() error {
-	return r.dbPool.Ping(context.Background())
+func (r *URLRepositoryPostgres) Ping(ctx context.Context) error {
+	return r.dbPool.Ping(ctx)
 }

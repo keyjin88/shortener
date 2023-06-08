@@ -97,7 +97,3 @@ func (s *ShortenService) generateShortenURL() (string, error) {
 		}
 	}
 }
-
-func (s *ShortenService) PingDB() error {
-	return s.urlRepository.Ping()
-}

@@ -87,7 +87,7 @@ func TestShortenService_ShortenString(t *testing.T) {
 				config:        &Config{},
 			}
 
-			got, err := s.ShortenURL(tt.args.serviceArgs)
+			got, err := s.ShortenURL(tt.args.serviceArgs, "any string")
 			assert.Equal(t, tt.wantErr, err)
 			assert.IsType(t, "String", got)
 		})
@@ -147,7 +147,7 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 				urlRepository: mockURLRepository,
 				config:        &Config{},
 			}
-			_, err := s.ShortenURLBatch(tt.serviceArgs)
+			_, err := s.ShortenURLBatch(tt.serviceArgs, "any string")
 			assert.Equal(t, tt.serviceError, err)
 		})
 	}

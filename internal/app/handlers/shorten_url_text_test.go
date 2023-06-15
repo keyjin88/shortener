@@ -36,6 +36,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 		expectedBody       string
 		expectedStringCall int
 		shortenStringCall  int
+		getStringCallCount int
 	}{
 		{
 			name:               "Save successfully",
@@ -46,6 +47,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 			expectedBody:       "/SHORTURL",
 			expectedStringCall: 1,
 			shortenStringCall:  1,
+			getStringCallCount: 1,
 		},
 		{
 			name:               "Invalid request body",
@@ -66,6 +68,7 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 			expectedBody:       "Invalid url string.",
 			expectedStringCall: 1,
 			shortenStringCall:  0,
+			getStringCallCount: 0,
 		},
 		{
 			name:               "Trouble while shortening url.",
@@ -76,12 +79,13 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 			expectedBody:       "Trouble while shortening url.",
 			expectedStringCall: 1,
 			shortenStringCall:  1,
+			getStringCallCount: 1,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockService := mocks.NewMockShortenService(ctrl)
-			mockService.EXPECT().ShortenURL(tt.url).
+			mockService.EXPECT().ShortenURL(tt.url, gomock.Any()).
 				Times(tt.shortenStringCall).
 				Return(tt.serviceReturn.result, tt.serviceReturn.error)
 
@@ -92,6 +96,8 @@ func TestHandler_ShortenURLWithMock(t *testing.T) {
 				Times(1)
 			mockRequestContext.EXPECT().GetRawData().
 				Return(tt.getRowDataReturn.result, tt.getRowDataReturn.error)
+			mockRequestContext.EXPECT().GetString(gomock.Any()).
+				Times(tt.getStringCallCount)
 
 			h := &Handler{
 				shortener: mockService,

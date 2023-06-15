@@ -27,6 +27,9 @@ func (s *ShortenService) GetShortenedURLByUserID(userId string) ([]storage.Users
 	if err != nil {
 		return nil, err
 	}
+	for i, u := range usersURLResponses {
+		usersURLResponses[i].ShortURL = s.config.BaseAddress + u.ShortURL
+	}
 	return usersURLResponses, nil
 }
 

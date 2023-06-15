@@ -28,7 +28,7 @@ func TestHandler_GetUserURL(t *testing.T) {
 		serviceReturn            getShortenURLReturn
 		getStringReturn          string
 		statusCode               int
-		getShortenedUrlCallCount int
+		getShortenedURLCallCount int
 		abortWithStatusCallCount int
 		jsonCallCount            int
 	}{
@@ -44,7 +44,7 @@ func TestHandler_GetUserURL(t *testing.T) {
 			},
 			getStringReturn:          "userID",
 			statusCode:               http.StatusOK,
-			getShortenedUrlCallCount: 1,
+			getShortenedURLCallCount: 1,
 			abortWithStatusCallCount: 0,
 			jsonCallCount:            1,
 		},
@@ -52,7 +52,7 @@ func TestHandler_GetUserURL(t *testing.T) {
 			name:                     "uid is empty",
 			getStringReturn:          "",
 			statusCode:               http.StatusUnauthorized,
-			getShortenedUrlCallCount: 0,
+			getShortenedURLCallCount: 0,
 			abortWithStatusCallCount: 1,
 			jsonCallCount:            0,
 		},
@@ -64,7 +64,7 @@ func TestHandler_GetUserURL(t *testing.T) {
 				error:  errors.New("some error"),
 			},
 			statusCode:               http.StatusBadRequest,
-			getShortenedUrlCallCount: 1,
+			getShortenedURLCallCount: 1,
 			abortWithStatusCallCount: 1,
 			jsonCallCount:            0,
 		},
@@ -76,7 +76,7 @@ func TestHandler_GetUserURL(t *testing.T) {
 				error:  nil,
 			},
 			statusCode:               http.StatusNoContent,
-			getShortenedUrlCallCount: 1,
+			getShortenedURLCallCount: 1,
 			abortWithStatusCallCount: 1,
 			jsonCallCount:            0,
 		},
@@ -85,7 +85,7 @@ func TestHandler_GetUserURL(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			mockService := mocks.NewMockShortenService(ctrl)
 			mockService.EXPECT().GetShortenedURLByUserID(tt.getStringReturn).
-				Return(tt.serviceReturn.result, tt.serviceReturn.error).Times(tt.getShortenedUrlCallCount)
+				Return(tt.serviceReturn.result, tt.serviceReturn.error).Times(tt.getShortenedURLCallCount)
 
 			mockRequestContext := mocks.NewMockRequestContext(ctrl)
 			mockRequestContext.EXPECT().GetString("uid").Return(tt.getStringReturn)

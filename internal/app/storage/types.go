@@ -27,7 +27,7 @@ type UsersURLResponse struct {
 
 type ShortenedURL struct {
 	ID            int64     `json:"-" db:"id"`
-	UserID        string    `json:"-" db:"user_id"`
+	UserID        string    `json:"user_id" db:"user_id"`
 	UUID          string    `json:"uuid" db:"-"`
 	CreatedAt     time.Time `json:"-" db:"created_at"`
 	UpdatedAt     time.Time `json:"-" db:"updated_at"`

@@ -23,7 +23,7 @@ func (s *ShortenService) GetShortenedURLByID(id string) (string, error) {
 }
 
 func (s *ShortenService) GetShortenedURLByUserID(userID string) ([]storage.UsersURLResponse, error) {
-	usersURLResponses, err := s.urlRepository.FindAllByUserId(userID)
+	usersURLResponses, err := s.urlRepository.FindAllByUserID(userID)
 	if err != nil {
 		return nil, err
 	}

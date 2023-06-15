@@ -48,9 +48,9 @@ func (mr *MockURLRepositoryMockRecorder) Close() *gomock.Call {
 }
 
 // FindAllByUserId mocks base method.
-func (m *MockURLRepository) FindAllByUserId(arg0 string) ([]storage.UsersURLResponse, error) {
+func (m *MockURLRepository) FindAllByUserID(arg0 string) ([]storage.UsersURLResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "FindAllByUserId", arg0)
+	ret := m.ctrl.Call(m, "FindAllByUserID", arg0)
 	ret0, _ := ret[0].([]storage.UsersURLResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
@@ -59,7 +59,7 @@ func (m *MockURLRepository) FindAllByUserId(arg0 string) ([]storage.UsersURLResp
 // FindAllByUserId indicates an expected call of FindAllByUserId.
 func (mr *MockURLRepositoryMockRecorder) FindAllByUserId(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllByUserId", reflect.TypeOf((*MockURLRepository)(nil).FindAllByUserId), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllByUserID", reflect.TypeOf((*MockURLRepository)(nil).FindAllByUserID), arg0)
 }
 
 // FindByOriginalURL mocks base method.

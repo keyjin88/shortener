@@ -152,3 +152,78 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 		})
 	}
 }
+
+func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	type repositoryReturn struct {
+		result []storage.UsersURLResponse
+		error  error
+	}
+
+	type serviceReturn struct {
+		result []storage.UsersURLResponse
+		error  error
+	}
+
+	tests := []struct {
+		name             string
+		repositoryReturn repositoryReturn
+		serviceReturn    serviceReturn
+	}{
+		{
+			name: "success",
+			repositoryReturn: repositoryReturn{
+				result: []storage.UsersURLResponse{
+					{
+						OriginalURL: "https://yandex.com/1",
+						ShortURL:    "111111",
+					},
+					{
+						OriginalURL: "https://mail.com/1",
+						ShortURL:    "222222",
+					},
+				},
+				error: nil,
+			},
+			serviceReturn: serviceReturn{
+				result: []storage.UsersURLResponse{
+					{
+						OriginalURL: "https://yandex.com/1",
+						ShortURL:    "/111111",
+					},
+					{
+						OriginalURL: "https://mail.com/1",
+						ShortURL:    "/222222",
+					},
+				},
+				error: nil,
+			},
+		},
+		{
+			name: "success",
+			repositoryReturn: repositoryReturn{
+				result: nil,
+				error:  errors.New("test error"),
+			},
+			serviceReturn: serviceReturn{
+				result: nil,
+				error:  errors.New("test error"),
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockURLRepository := mocks.NewMockURLRepository(ctrl)
+			mockURLRepository.EXPECT().FindAllByUserId(gomock.Any()).Return(tt.repositoryReturn.result, tt.repositoryReturn.error)
+			s := &ShortenService{
+				urlRepository: mockURLRepository,
+				config:        &Config{},
+			}
+			got, err := s.GetShortenedURLByUserID("userId")
+			assert.Equal(t, tt.serviceReturn.error, err)
+			assert.Equal(t, tt.serviceReturn.result, got)
+		})
+	}
+}

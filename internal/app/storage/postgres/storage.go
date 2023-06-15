@@ -54,7 +54,7 @@ func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, e
 	return shortURL, nil
 }
 
-func (r *URLRepositoryPostgres) FindAllByUserId(userID string) ([]storage.UsersURLResponse, error) {
+func (r *URLRepositoryPostgres) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
 	ctx := context.Background()
 	query := `SELECT short_url, original_url FROM shortened_url WHERE user_id = $1`
 	rows, err := r.dbPool.Query(ctx, query, userID)

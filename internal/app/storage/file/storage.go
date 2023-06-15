@@ -70,8 +70,28 @@ func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error
 	return "", fmt.Errorf("URL not found: %v", originalURL)
 }
 
-func (r *URLRepositoryFile) FindAllByUserId(userID string) ([]storage.UsersURLResponse, error) {
-	return nil, nil
+func (r *URLRepositoryFile) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
+	_, err := r.file.Seek(0, 0)
+	if err != nil {
+		return nil, err
+	}
+	var userURLs []storage.UsersURLResponse
+	scanner := bufio.NewScanner(r.file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		var temp storage.ShortenedURL
+		err := json.Unmarshal([]byte(line), &temp)
+		if err != nil {
+			return nil, err
+		}
+		if temp.UserID == userID {
+			userURLs = append(userURLs, storage.UsersURLResponse{ShortURL: temp.ShortURL, OriginalURL: temp.OriginalURL})
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return userURLs, nil
 }
 
 func (r *URLRepositoryFile) SaveBatch(urls *[]storage.ShortenedURL) error {

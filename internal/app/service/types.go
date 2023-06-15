@@ -18,6 +18,7 @@ type Config struct {
 type URLRepository interface {
 	FindByShortenedURL(shortURL string) (string, error)
 	FindByOriginalURL(originalURL string) (string, error)
+	FindAllByUserId(userID string) ([]storage.UsersURLResponse, error)
 	Save(*storage.ShortenedURL) error
 	SaveBatch(urls *[]storage.ShortenedURL) error
 	Close()

@@ -48,6 +48,10 @@ func (ur *URLRepositoryInMem) FindByOriginalURL(originalURL string) (string, err
 	return "", errors.New("URL not found: " + originalURL)
 }
 
+func (r *URLRepositoryInMem) FindAllByUserId(userID string) ([]storage.UsersURLResponse, error) {
+	return nil, nil
+}
+
 // RestoreData восстанавливает состояние БД
 func (ur *URLRepositoryInMem) RestoreData(data []storage.ShortenedURL) {
 	for _, e := range data {

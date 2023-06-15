@@ -20,7 +20,8 @@ func (h *Handler) ShortenURLText(c RequestContext) {
 		c.String(http.StatusBadRequest, "Invalid url string.")
 		return
 	}
-	shortenURL, err := h.shortener.ShortenURL(uri.String())
+	uid := c.GetString("uid")
+	shortenURL, err := h.shortener.ShortenURL(uri.String(), uid)
 	if err != nil {
 		if err.Error() == "URL already exists" {
 			c.String(http.StatusConflict, shortenURL)

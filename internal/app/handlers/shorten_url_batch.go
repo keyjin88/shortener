@@ -15,7 +15,8 @@ func (h *Handler) ShortenURLBatch(c RequestContext) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while marshalling json"})
 		return
 	}
-	batch, err := h.shortener.ShortenURLBatch(req)
+	uid := c.GetString("uid")
+	batch, err := h.shortener.ShortenURLBatch(req, uid)
 	if err != nil {
 		logger.Log.Infof("error while shortening url: %v", err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})

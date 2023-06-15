@@ -70,6 +70,10 @@ func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error
 	return "", fmt.Errorf("URL not found: %v", originalURL)
 }
 
+func (r *URLRepositoryFile) FindAllByUserId(userID string) ([]storage.UsersURLResponse, error) {
+	return nil, nil
+}
+
 func (r *URLRepositoryFile) SaveBatch(urls *[]storage.ShortenedURL) error {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {

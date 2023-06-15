@@ -20,8 +20,14 @@ type ShortenURLBatchResponse struct {
 	ShortURL      string `json:"short_url"`
 }
 
+type UsersURLResponse struct {
+	ShortURL    string `json:"short_url"`
+	OriginalURL string `json:"original_url"`
+}
+
 type ShortenedURL struct {
 	ID            int64     `json:"-" db:"id"`
+	UserID        string    `json:"-" db:"user_id"`
 	UUID          string    `json:"uuid" db:"-"`
 	CreatedAt     time.Time `json:"-" db:"created_at"`
 	UpdatedAt     time.Time `json:"-" db:"updated_at"`

@@ -7,6 +7,7 @@ import (
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers"
 	"github.com/keyjin88/shortener/internal/app/logger"
+	"github.com/keyjin88/shortener/internal/app/middleware/auth"
 	"github.com/keyjin88/shortener/internal/app/middleware/compressor"
 	loggerMiddleware "github.com/keyjin88/shortener/internal/app/middleware/logger"
 	"github.com/keyjin88/shortener/internal/app/service"
@@ -55,6 +56,7 @@ func (api *API) setupRouter() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	router := gin.New()
+	router.Use(auth.AuthenticationMiddleware(&api.config.SecretKey))
 	router.Use(compressor.CompressionMiddleware())
 	router.Use(loggerMiddleware.LoggingMiddleware())
 	//Раскомментировать для перехода на штатный логгер gin
@@ -69,6 +71,7 @@ func (api *API) setupRouter() {
 	{
 		apiGroup.POST("/shorten", func(c *gin.Context) { api.handlers.ShortenURLJSON(c) })
 		apiGroup.POST("/shorten/batch", func(c *gin.Context) { api.handlers.ShortenURLBatch(c) })
+		apiGroup.GET("/user/urls", func(c *gin.Context) { api.handlers.GetUserURL(c) })
 	}
 	api.router = router
 }

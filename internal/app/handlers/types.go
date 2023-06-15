@@ -24,9 +24,9 @@ type RequestContext interface {
 //go:generate mockgen -destination=mocks/shorten_service.go -package=mocks . ShortenService
 type ShortenService interface {
 	GetShortenedURLByID(id string) (string, error)
-	GetShortenedURLByUserID(userId string) ([]storage.UsersURLResponse, error)
-	ShortenURL(url string, userId string) (string, error)
-	ShortenURLBatch(request storage.ShortenURLBatchRequest, userId string) ([]storage.ShortenURLBatchResponse, error)
+	GetShortenedURLByUserID(userID string) ([]storage.UsersURLResponse, error)
+	ShortenURL(url string, userID string) (string, error)
+	ShortenURLBatch(request storage.ShortenURLBatchRequest, userID string) ([]storage.ShortenURLBatchResponse, error)
 }
 
 type Handler struct {

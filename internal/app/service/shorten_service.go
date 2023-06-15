@@ -22,24 +22,24 @@ func (s *ShortenService) GetShortenedURLByID(id string) (string, error) {
 	return s.urlRepository.FindByShortenedURL(id)
 }
 
-func (s *ShortenService) GetShortenedURLByUserID(userId string) ([]storage.UsersURLResponse, error) {
-	usersURLResponses, err := s.urlRepository.FindAllByUserId(userId)
+func (s *ShortenService) GetShortenedURLByUserID(userID string) ([]storage.UsersURLResponse, error) {
+	usersURLResponses, err := s.urlRepository.FindAllByUserId(userID)
 	if err != nil {
 		return nil, err
 	}
 	for i, u := range usersURLResponses {
-		usersURLResponses[i].ShortURL = s.config.BaseAddress + u.ShortURL
+		usersURLResponses[i].ShortURL = s.config.BaseAddress + "/" + u.ShortURL
 	}
 	return usersURLResponses, nil
 }
 
-func (s *ShortenService) ShortenURL(url string, userId string) (string, error) {
+func (s *ShortenService) ShortenURL(url string, userID string) (string, error) {
 	keyStr, err := s.generateShortenURL()
 	if err != nil {
 		return "", err
 	}
 	shortURL := storage.ShortenedURL{
-		UserID:      userId,
+		UserID:      userID,
 		ShortURL:    keyStr,
 		OriginalURL: url,
 	}
@@ -60,7 +60,7 @@ func (s *ShortenService) ShortenURL(url string, userId string) (string, error) {
 	return s.config.BaseAddress + "/" + shortURL.ShortURL, err
 }
 
-func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest, userId string) ([]storage.ShortenURLBatchResponse, error) {
+func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest, userID string) ([]storage.ShortenURLBatchResponse, error) {
 	var urlArray []storage.ShortenedURL
 	for _, url := range request {
 		shortenURL, err := s.generateShortenURL()
@@ -68,7 +68,7 @@ func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest,
 			return nil, err
 		}
 		shortenedURL := storage.ShortenedURL{
-			UserID:        userId,
+			UserID:        userID,
 			CreatedAt:     time.Now(),
 			OriginalURL:   url.OriginalURL,
 			ShortURL:      shortenURL,

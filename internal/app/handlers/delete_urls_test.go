@@ -25,8 +25,8 @@ func TestHandler_DeleteURLs(t *testing.T) {
 		status                   int
 		abortWithStatusCallCount int
 		jsonCallCount            int
-		bindJsonReturn           error
-		bindJsonCallCount        int
+		bindJSONReturn           error
+		bindJSONCallCount        int
 		getStringReturn          string
 	}{
 		{
@@ -34,8 +34,8 @@ func TestHandler_DeleteURLs(t *testing.T) {
 			getStringReturn:          "userID",
 			serviceReturn:            nil,
 			serviceCallCount:         1,
-			bindJsonReturn:           nil,
-			bindJsonCallCount:        1,
+			bindJSONReturn:           nil,
+			bindJSONCallCount:        1,
 			status:                   http.StatusAccepted,
 			abortWithStatusCallCount: 0,
 			jsonCallCount:            1,
@@ -45,8 +45,8 @@ func TestHandler_DeleteURLs(t *testing.T) {
 			getStringReturn:          "",
 			serviceReturn:            nil,
 			serviceCallCount:         0,
-			bindJsonReturn:           nil,
-			bindJsonCallCount:        0,
+			bindJSONReturn:           nil,
+			bindJSONCallCount:        0,
 			status:                   http.StatusUnauthorized,
 			abortWithStatusCallCount: 1,
 			jsonCallCount:            0,
@@ -56,8 +56,8 @@ func TestHandler_DeleteURLs(t *testing.T) {
 			getStringReturn:          "userID",
 			serviceReturn:            nil,
 			serviceCallCount:         0,
-			bindJsonReturn:           errors.New("some error"),
-			bindJsonCallCount:        1,
+			bindJSONReturn:           errors.New("some error"),
+			bindJSONCallCount:        1,
 			status:                   http.StatusBadRequest,
 			abortWithStatusCallCount: 1,
 			jsonCallCount:            0,
@@ -67,8 +67,8 @@ func TestHandler_DeleteURLs(t *testing.T) {
 			getStringReturn:          "userID",
 			serviceReturn:            errors.New("some error"),
 			serviceCallCount:         1,
-			bindJsonReturn:           nil,
-			bindJsonCallCount:        1,
+			bindJSONReturn:           nil,
+			bindJSONCallCount:        1,
 			status:                   http.StatusInternalServerError,
 			abortWithStatusCallCount: 1,
 			jsonCallCount:            0,
@@ -84,7 +84,7 @@ func TestHandler_DeleteURLs(t *testing.T) {
 		mockRequestContext.EXPECT().GetString(gomock.Any()).Return(tt.getStringReturn).Times(1)
 		mockRequestContext.EXPECT().AbortWithStatus(tt.status).Times(tt.abortWithStatusCallCount)
 		mockRequestContext.EXPECT().JSON(tt.status, gomock.Any()).Times(tt.jsonCallCount)
-		mockRequestContext.EXPECT().BindJSON(gomock.Any()).Return(tt.bindJsonReturn).Times(tt.bindJsonCallCount)
+		mockRequestContext.EXPECT().BindJSON(gomock.Any()).Return(tt.bindJSONReturn).Times(tt.bindJSONCallCount)
 
 		t.Run(tt.name, func(t *testing.T) {
 			h := &Handler{

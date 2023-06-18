@@ -34,11 +34,25 @@ func (m *MockShortenService) EXPECT() *MockShortenServiceMockRecorder {
 	return m.recorder
 }
 
+// DeleteURLs mocks base method.
+func (m *MockShortenService) DeleteURLs(arg0 *[]string, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteURLs", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteURLs indicates an expected call of DeleteURLs.
+func (mr *MockShortenServiceMockRecorder) DeleteURLs(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteURLs", reflect.TypeOf((*MockShortenService)(nil).DeleteURLs), arg0, arg1)
+}
+
 // GetShortenedURLByID mocks base method.
-func (m *MockShortenService) GetShortenedURLByID(arg0 string) (string, error) {
+func (m *MockShortenService) GetShortenedURLByID(arg0 string) (storage.ShortenedURL, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetShortenedURLByID", arg0)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(storage.ShortenedURL)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

@@ -23,7 +23,8 @@ func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context) (*URLReposit
         unique,
     created_at     date    not null,
     updated_at     date    not null,
-    correlation_id varchar
+    correlation_id varchar,
+    is_deleted     boolean not null default false
 );`
 	_, err := pool.Exec(ctx, query)
 	if err != nil {
@@ -32,15 +33,16 @@ func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context) (*URLReposit
 	return &URLRepositoryPostgres{dbPool: pool}, nil
 }
 
-func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (string, error) {
+func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	ctx := context.Background()
-	query := `SELECT original_url FROM public.shortened_url WHERE short_url = $1`
+	query := `SELECT original_url, is_deleted FROM public.shortened_url WHERE short_url = $1`
 	var originalURL string
-	err := r.dbPool.QueryRow(ctx, query, shortURL).Scan(&originalURL)
+	var isDeleted bool
+	err := r.dbPool.QueryRow(ctx, query, shortURL).Scan(&originalURL, &isDeleted)
 	if err != nil {
-		return "", err
+		return storage.ShortenedURL{}, err
 	}
-	return originalURL, nil
+	return storage.ShortenedURL{OriginalURL: originalURL, IsDeleted: isDeleted}, nil
 }
 
 func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, error) {
@@ -126,6 +128,42 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 	}()
 
 	return nil
+}
+
+func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userId string) error {
+	sql := `UPDATE my_table SET is_deleted = true WHERE id = ANY($1) AND user_id = $2`
+	ch := make(chan []string)
+	defer close(ch)
+
+	// Запускаем горутину для фан-ин паттерна
+	go fanIn(ch, func(ids []string) error {
+		// Выполняем множественное обновление
+		_, err := r.dbPool.Exec(context.Background(), sql, ids, userId)
+		if err != nil {
+			logger.Log.Infof("error while deleting: %e", err)
+			return err
+		}
+		return nil
+	})
+	// Разбиваем слайс на части для более эффективного обновления
+	batchSize := 100
+	for i := 0; i < len(ids); i += batchSize {
+		end := i + batchSize
+		if end > len(ids) {
+			end = len(ids)
+		}
+		ch <- ids[i:end]
+	}
+	return nil
+}
+
+func fanIn(ch <-chan []string, f func([]string) error) {
+	// Выполняем обновление для каждого блока данных, полученного из канала
+	for ids := range ch {
+		if err := f(ids); err != nil {
+			logger.Log.Infof("error while deleting in fanin: %e", err)
+		}
+	}
 }
 
 func (r *URLRepositoryPostgres) Close() {

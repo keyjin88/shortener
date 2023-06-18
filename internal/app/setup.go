@@ -72,6 +72,7 @@ func (api *API) setupRouter() {
 		apiGroup.POST("/shorten", func(c *gin.Context) { api.handlers.ShortenURLJSON(c) })
 		apiGroup.POST("/shorten/batch", func(c *gin.Context) { api.handlers.ShortenURLBatch(c) })
 		apiGroup.GET("/user/urls", func(c *gin.Context) { api.handlers.GetUserURL(c) })
+		apiGroup.DELETE("/user/urls", func(c *gin.Context) { api.handlers.DeleteURLs(c) })
 	}
 	api.router = router
 }

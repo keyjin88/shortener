@@ -34,4 +34,5 @@ type ShortenedURL struct {
 	ShortURL      string    `json:"short_url" db:"short_url"`
 	OriginalURL   string    `json:"original_url" db:"original_url"`
 	CorrelationID string    `json:"correlation_id" db:"correlation_id"`
+	IsDeleted     bool      `json:"is_deleted" db:"is_deleted"`
 }

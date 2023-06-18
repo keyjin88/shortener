@@ -19,7 +19,7 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    string
+		want    storage.ShortenedURL
 		wantErr error
 	}{
 		{
@@ -27,7 +27,7 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 			args: args{
 				id: "SHORTSTRING",
 			},
-			want:    "https://example.com/1",
+			want:    storage.ShortenedURL{OriginalURL: "https://example.com/1"},
 			wantErr: errors.New("test error"),
 		},
 		{
@@ -35,7 +35,7 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 			args: args{
 				id: "SHORTSTRING",
 			},
-			want:    "",
+			want:    storage.ShortenedURL{},
 			wantErr: nil,
 		},
 	}
@@ -80,7 +80,7 @@ func TestShortenService_ShortenString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return("any string", errors.New("not found url"))
+			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return(storage.ShortenedURL{}, errors.New("not found url"))
 			mockURLRepository.EXPECT().Save(gomock.Any()).Times(tt.args.repositoryCallCount)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
@@ -102,7 +102,7 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 		name                     string
 		serviceArgs              storage.ShortenURLBatchRequest
 		serviceError             error
-		repositoryReturn         string
+		repositoryReturn         storage.ShortenedURL
 		repositoryError          error
 		repositoryCallCount      int
 		repositorySaveBatchError error
@@ -114,7 +114,7 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 				{CorrelationID: "BBB", OriginalURL: "https://yandex.com/1"},
 			},
 			serviceError:             nil,
-			repositoryReturn:         "",
+			repositoryReturn:         storage.ShortenedURL{},
 			repositoryError:          errors.New("repository"),
 			repositoryCallCount:      2,
 			repositorySaveBatchError: nil,
@@ -126,7 +126,7 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 				{CorrelationID: "BBB", OriginalURL: "https://yandex.com/1"},
 			},
 			serviceError:             errors.New("while saving batch"),
-			repositoryReturn:         "",
+			repositoryReturn:         storage.ShortenedURL{},
 			repositoryError:          errors.New("repository"),
 			repositoryCallCount:      2,
 			repositorySaveBatchError: errors.New("while saving batch"),
@@ -216,7 +216,7 @@ func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindAllByUserId(gomock.Any()).Return(tt.repositoryReturn.result, tt.repositoryReturn.error)
+			mockURLRepository.EXPECT().FindAllByUserID(gomock.Any()).Return(tt.repositoryReturn.result, tt.repositoryReturn.error)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 				config:        &Config{},

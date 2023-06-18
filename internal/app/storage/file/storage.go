@@ -24,10 +24,10 @@ func NewURLRepositoryFile(filePath *string) (*URLRepositoryFile, error) {
 	return &urlRepositoryFile, nil
 }
 
-func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (string, error) {
+func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
-		return "", err
+		return storage.ShortenedURL{}, err
 	}
 	scanner := bufio.NewScanner(r.file)
 	for scanner.Scan() {
@@ -35,16 +35,16 @@ func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (string, error) 
 		var temp storage.ShortenedURL
 		err := json.Unmarshal([]byte(line), &temp)
 		if err != nil {
-			return "", err
+			return storage.ShortenedURL{}, err
 		}
 		if temp.ShortURL == shortURL {
-			return temp.OriginalURL, nil
+			return temp, nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return storage.ShortenedURL{}, err
 	}
-	return "", fmt.Errorf("URL not found: %v", shortURL)
+	return storage.ShortenedURL{}, fmt.Errorf("URL not found: %v", shortURL)
 }
 
 func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error) {
@@ -145,4 +145,8 @@ func (r *URLRepositoryFile) Ping(ctx context.Context) error {
 	} else {
 		return nil
 	}
+}
+
+func (r *URLRepositoryFile) DeleteRecords(ids []string, userId string) error {
+	return nil
 }

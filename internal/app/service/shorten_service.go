@@ -18,7 +18,7 @@ func NewShortenService(urlRepository URLRepository, baseAddress string) *Shorten
 	}
 }
 
-func (s *ShortenService) GetShortenedURLByID(id string) (string, error) {
+func (s *ShortenService) GetShortenedURLByID(id string) (storage.ShortenedURL, error) {
 	return s.urlRepository.FindByShortenedURL(id)
 }
 
@@ -88,6 +88,10 @@ func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest,
 			ShortURL:      s.config.BaseAddress + "/" + url.ShortURL})
 	}
 	return result, nil
+}
+
+func (s *ShortenService) DeleteURLs(req *[]string, userID string) error {
+	return s.urlRepository.DeleteRecords(*req, userID)
 }
 
 func (s *ShortenService) generateShortenURL() (string, error) {

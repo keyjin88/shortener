@@ -23,5 +23,5 @@ type URLRepository interface {
 	SaveBatch(urls *[]storage.ShortenedURL) error
 	Close()
 	Ping(ctx context.Context) error
-	DeleteRecords(ids []string, userId string) error
+	DeleteRecords(ids []string, userID string) error
 }

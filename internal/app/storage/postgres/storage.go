@@ -130,7 +130,7 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 	return nil
 }
 
-func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userId string) error {
+func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userID string) error {
 	sql := `UPDATE shortened_url SET is_deleted = true WHERE short_url = ANY($1) AND user_id = $2`
 	ch := make(chan []string)
 	defer close(ch)
@@ -138,7 +138,7 @@ func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userId string) error
 	// Запускаем горутину для фан-ин паттерна
 	go fanIn(ch, func(ids []string) error {
 		// Выполняем множественное обновление
-		_, err := r.dbPool.Exec(context.Background(), sql, ids, userId)
+		_, err := r.dbPool.Exec(context.Background(), sql, ids, userID)
 		if err != nil {
 			logger.Log.Infof("error while deleting: %e", err)
 			return err

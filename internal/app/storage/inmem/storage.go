@@ -74,6 +74,6 @@ func (ur *URLRepositoryInMem) Ping(ctx context.Context) error {
 	return nil
 }
 
-func (ur *URLRepositoryInMem) DeleteRecords(ids []string, userId string) error {
+func (ur *URLRepositoryInMem) DeleteRecords(ids []string, userID string) error {
 	return nil
 }

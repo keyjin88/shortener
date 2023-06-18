@@ -147,6 +147,6 @@ func (r *URLRepositoryFile) Ping(ctx context.Context) error {
 	}
 }
 
-func (r *URLRepositoryFile) DeleteRecords(ids []string, userId string) error {
+func (r *URLRepositoryFile) DeleteRecords(ids []string, userID string) error {
 	return nil
 }

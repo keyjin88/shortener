@@ -131,7 +131,7 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 }
 
 func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userId string) error {
-	sql := `UPDATE my_table SET is_deleted = true WHERE id = ANY($1) AND user_id = $2`
+	sql := `UPDATE shortened_url SET is_deleted = true WHERE id = ANY($1) AND user_id = $2`
 	ch := make(chan []string)
 	defer close(ch)
 

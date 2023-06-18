@@ -13,25 +13,24 @@ import (
 	"time"
 )
 
+type Cookie struct {
+	encryptedCookie string
+	expiration      time.Time
+	uid             string
+}
+
 func AuthenticationMiddleware(secretKey *string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, err := c.Cookie("auth")
 		if err != nil {
 			// Куки не существует, выдаём новую
-			newUUID, err := uuid.NewUUID()
+			generatedCookie, err := generateCookie(secretKey)
 			if err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
 				return
 			}
-			uid := newUUID.String() // Уникальный идентификатор пользователя
-			encryptedCookie, err := encryptCookie(uid, []byte(*secretKey))
-			if err != nil {
-				c.AbortWithError(http.StatusInternalServerError, err)
-				return
-			}
-			expiration := time.Now().Add(24 * time.Hour)
-			c.SetCookie("auth", encryptedCookie, int(expiration.Unix()), "/", "", false, true)
-			c.Set("uid", uid)
+			c.SetCookie("auth", generatedCookie.encryptedCookie, int(generatedCookie.expiration.Unix()), "/", "", false, true)
+			c.Set("uid", generatedCookie.uid)
 			c.Next()
 			return
 		}
@@ -40,19 +39,12 @@ func AuthenticationMiddleware(secretKey *string) gin.HandlerFunc {
 		uid, err := decryptCookie(cookie, []byte(*secretKey))
 		if err != nil {
 			// Куки не проходит проверку, выдаём новую
-			newUUID, err := uuid.NewUUID()
+			generatedCookie, err := generateCookie(secretKey)
 			if err != nil {
 				c.AbortWithError(http.StatusBadRequest, err)
 				return
 			}
-			uid = newUUID.String() // Уникальный идентификатор пользователя
-			encryptedCookie, err := encryptCookie(uid, []byte(*secretKey))
-			if err != nil {
-				c.AbortWithError(http.StatusBadRequest, err)
-				return
-			}
-			expiration := time.Now().Add(24 * time.Hour)
-			c.SetCookie("auth", encryptedCookie, int(expiration.Unix()), "/", "", false, true)
+			c.SetCookie("auth", generatedCookie.encryptedCookie, int(generatedCookie.expiration.Unix()), "/", "", false, true)
 		}
 		// Передаём уникальный идентификатор пользователя в следующий middleware/handler
 		c.Set("uid", uid)
@@ -94,12 +86,16 @@ func decryptCookie(cipherText string, secretKey []byte) (string, error) {
 	return string(ciphertext), nil
 }
 
-func generateRandom(size int) ([]byte, error) {
-	// генерируем случайную последовательность байт
-	b := make([]byte, size)
-	_, err := rand.Read(b)
+func generateCookie(secretKey *string) (Cookie, error) {
+	newUUID, err := uuid.NewUUID()
 	if err != nil {
-		return nil, err
+		return Cookie{}, err
 	}
-	return b, nil
+	uid := newUUID.String()
+	encryptedCookie, err := encryptCookie(uid, []byte(*secretKey))
+	if err != nil {
+		return Cookie{}, err
+	}
+	expiration := time.Now().Add(24 * time.Hour)
+	return Cookie{encryptedCookie, expiration, uid}, nil
 }

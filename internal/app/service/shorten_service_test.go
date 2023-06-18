@@ -202,7 +202,7 @@ func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
 			},
 		},
 		{
-			name: "success",
+			name: "error",
 			repositoryReturn: repositoryReturn{
 				result: nil,
 				error:  errors.New("test error"),
@@ -224,6 +224,44 @@ func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
 			got, err := s.GetShortenedURLByUserID("userId")
 			assert.Equal(t, tt.serviceReturn.error, err)
 			assert.Equal(t, tt.serviceReturn.result, got)
+		})
+	}
+}
+
+func TestShortenService_DeleteURLs(t *testing.T) {
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	tests := []struct {
+		name   string
+		urls   []string
+		userID string
+		error  error
+	}{
+		{
+			name:   "success",
+			urls:   []string{"https://example.com/1", "https://example.com/2", "https://yandex.com/1"},
+			userID: "userId",
+			error:  nil,
+		},
+		{
+			name:   "error",
+			urls:   []string{"https://example.com/1", "https://example.com/2", "https://yandex.com/1"},
+			userID: "userId",
+			error:  errors.New("test error"),
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			mockURLRepository := mocks.NewMockURLRepository(ctrl)
+			mockURLRepository.EXPECT().DeleteRecords(gomock.Any(), gomock.Any()).Return(tt.error)
+
+			s := &ShortenService{
+				urlRepository: mockURLRepository,
+				config:        &Config{},
+			}
+			err := s.DeleteURLs(&tt.urls, tt.userID)
+			assert.Equal(t, tt.error, err)
 		})
 	}
 }

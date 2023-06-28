@@ -9,35 +9,42 @@ import (
 )
 
 type URLRepositoryPostgres struct {
-	dbPool *pgxpool.Pool
+	dbPool       *pgxpool.Pool
+	urlsToDelete chan storage.UserURLs
 }
 
-func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context) (*URLRepositoryPostgres, error) {
+func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context, toDeleteChan chan storage.UserURLs) (*URLRepositoryPostgres, error) {
 	query := `create table if not exists public.shortened_url
 (
-    id             serial primary key,
+    id             serial
+        primary key,
+    user_id        varchar not null,
     short_url      varchar,
-    original_url   varchar unique,
-    created_at     date not null,
-    updated_at     date not null,
-    correlation_id varchar
+    original_url   varchar
+        unique,
+    created_at     timestamp    not null,
+    updated_at     timestamp    not null,
+    correlation_id varchar,
+    is_deleted     boolean not null default false
 );`
 	_, err := pool.Exec(ctx, query)
 	if err != nil {
 		return nil, err
 	}
-	return &URLRepositoryPostgres{dbPool: pool}, nil
+	go WorkerDeleteURLs(toDeleteChan, pool)
+	return &URLRepositoryPostgres{dbPool: pool, urlsToDelete: toDeleteChan}, nil
 }
 
-func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (string, error) {
+func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	ctx := context.Background()
-	query := `SELECT original_url FROM public.shortened_url WHERE short_url = $1`
+	query := `SELECT original_url, is_deleted FROM public.shortened_url WHERE short_url = $1`
 	var originalURL string
-	err := r.dbPool.QueryRow(ctx, query, shortURL).Scan(&originalURL)
+	var isDeleted bool
+	err := r.dbPool.QueryRow(ctx, query, shortURL).Scan(&originalURL, &isDeleted)
 	if err != nil {
-		return "", err
+		return storage.ShortenedURL{}, err
 	}
-	return originalURL, nil
+	return storage.ShortenedURL{OriginalURL: originalURL, IsDeleted: isDeleted}, nil
 }
 
 func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, error) {
@@ -51,16 +58,40 @@ func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, e
 	return shortURL, nil
 }
 
+func (r *URLRepositoryPostgres) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
+	ctx := context.Background()
+	query := `SELECT short_url, original_url FROM shortened_url WHERE user_id = $1`
+	rows, err := r.dbPool.Query(ctx, query, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var userURLs []storage.UsersURLResponse
+	for rows.Next() {
+		var shortURL, originalURL string
+		err := rows.Scan(&shortURL, &originalURL)
+		if err != nil {
+			return nil, err
+		}
+		userURLs = append(userURLs, storage.UsersURLResponse{ShortURL: shortURL, OriginalURL: originalURL})
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+	return userURLs, nil
+}
+
 func (r *URLRepositoryPostgres) Save(shortenedURL *storage.ShortenedURL) error {
 	ctx := context.Background()
 	now := time.Now()
 	shortenedURL.CreatedAt = now
 	shortenedURL.UpdatedAt = now
 
-	query := `INSERT INTO shortened_url (created_at, updated_at, short_url, original_url)
-			VALUES ($1, $2, $3, $4)
+	query := `INSERT INTO shortened_url (user_id, created_at, updated_at, short_url, original_url)
+			VALUES ($1, $2, $3, $4, $5)
 			RETURNING id;`
-	err := r.dbPool.QueryRow(ctx, query, shortenedURL.CreatedAt, shortenedURL.UpdatedAt, shortenedURL.ShortURL, shortenedURL.OriginalURL).Scan(&shortenedURL.ID)
+	err := r.dbPool.QueryRow(ctx, query, shortenedURL.UserID, shortenedURL.CreatedAt, shortenedURL.UpdatedAt, shortenedURL.ShortURL, shortenedURL.OriginalURL).Scan(&shortenedURL.ID)
 	if err != nil {
 		return err
 	}
@@ -77,10 +108,10 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 
 	for _, url := range *urls {
 		err = tx.QueryRow(context.Background(),
-			`INSERT INTO shortened_url(short_url, original_url, created_at, updated_at, correlation_id) 
-				 VALUES ($1, $2, $3, $4, $5) 
+			`INSERT INTO shortened_url(user_id, short_url, original_url, created_at, updated_at, correlation_id) 
+				 VALUES ($1, $2, $3, $4, $5, $6) 
 				 RETURNING id`,
-			url.ShortURL, url.OriginalURL, url.CreatedAt, time.Now(), url.CorrelationID).
+			url.UserID, url.ShortURL, url.OriginalURL, url.CreatedAt, time.Now(), url.CorrelationID).
 			Scan(&url.ID)
 		if err != nil {
 			return err
@@ -89,16 +120,37 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 
 	defer func() {
 		if p := recover(); p != nil {
-			tx.Rollback(context.Background())
+			err := tx.Rollback(context.Background())
+			if err != nil {
+				return
+			}
 			logger.Log.Error(p)
 		} else if err != nil {
-			tx.Rollback(context.Background())
+			err := tx.Rollback(context.Background())
+			if err != nil {
+				return
+			}
 		} else {
 			err = tx.Commit(context.Background())
 		}
 	}()
 
 	return nil
+}
+
+func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userID string) error {
+	r.urlsToDelete <- storage.UserURLs{UserID: userID, URLs: ids}
+	return nil
+}
+
+func WorkerDeleteURLs(ch <-chan storage.UserURLs, pool *pgxpool.Pool) {
+	for userUrls := range ch {
+		sql := `UPDATE shortened_url SET is_deleted = true, updated_at = $1  WHERE short_url = ANY($2) AND user_id = $3`
+		_, err := pool.Exec(context.Background(), sql, time.Now(), userUrls.URLs, userUrls.UserID)
+		if err != nil {
+			logger.Log.Infof("error while deleting: %e", err)
+		}
+	}
 }
 
 func (r *URLRepositoryPostgres) Close() {

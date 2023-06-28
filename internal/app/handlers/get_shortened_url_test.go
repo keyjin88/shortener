@@ -6,12 +6,13 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/keyjin88/shortener/internal/app/handlers/mocks"
 	"github.com/keyjin88/shortener/internal/app/logger"
+	"github.com/keyjin88/shortener/internal/app/storage"
 	"net/http"
 	"testing"
 )
 
 type getShortenURLReturn struct {
-	result string
+	result storage.ShortenedURL
 	error  error
 }
 
@@ -37,7 +38,7 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 			name:                 "Get successfully",
 			shortenURL:           "ShortenURL",
 			originalURL:          "https://www.test.ru",
-			serviceReturn:        getShortenURLReturn{result: "https://www.test.ru", error: nil},
+			serviceReturn:        getShortenURLReturn{result: storage.ShortenedURL{OriginalURL: "https://www.test.ru"}, error: nil},
 			expectedRedirectCall: 1,
 			expectedStringCall:   0,
 			expectedCode:         http.StatusTemporaryRedirect,
@@ -45,7 +46,7 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 		{
 			name:                 "URL not found",
 			shortenURL:           "ShortenURL",
-			serviceReturn:        getShortenURLReturn{result: "", error: errors.New("test error")},
+			serviceReturn:        getShortenURLReturn{result: storage.ShortenedURL{}, error: errors.New("test error")},
 			expectedCode:         http.StatusBadRequest,
 			expectedRedirectCall: 0,
 			expectedStringCall:   1,

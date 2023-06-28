@@ -88,6 +88,20 @@ func (mr *MockRequestContextMockRecorder) GetRawData() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetRawData", reflect.TypeOf((*MockRequestContext)(nil).GetRawData))
 }
 
+// GetString mocks base method.
+func (m *MockRequestContext) GetString(arg0 string) string {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetString", arg0)
+	ret0, _ := ret[0].(string)
+	return ret0
+}
+
+// GetString indicates an expected call of GetString.
+func (mr *MockRequestContextMockRecorder) GetString(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetString", reflect.TypeOf((*MockRequestContext)(nil).GetString), arg0)
+}
+
 // Header mocks base method.
 func (m *MockRequestContext) Header(arg0, arg1 string) {
 	m.ctrl.T.Helper()

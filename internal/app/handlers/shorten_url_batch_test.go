@@ -28,6 +28,7 @@ func TestHandler_ShortenURLBatch(t *testing.T) {
 		serviceErr         error
 		serviceCallCount   int
 		expectedStatusCode int
+		getStringCallCount int
 	}{
 		{
 			name:    "save successfully",
@@ -43,6 +44,7 @@ func TestHandler_ShortenURLBatch(t *testing.T) {
 			jsonCallCount:      1,
 			serviceErr:         nil,
 			serviceCallCount:   1,
+			getStringCallCount: 1,
 			expectedStatusCode: http.StatusCreated,
 		},
 		{
@@ -53,6 +55,7 @@ func TestHandler_ShortenURLBatch(t *testing.T) {
 			serviceReturn:      nil,
 			serviceErr:         errors.New("some error"),
 			serviceCallCount:   1,
+			getStringCallCount: 1,
 			expectedStatusCode: http.StatusBadRequest,
 		},
 		{
@@ -63,6 +66,7 @@ func TestHandler_ShortenURLBatch(t *testing.T) {
 			serviceReturn:      nil,
 			serviceErr:         nil,
 			serviceCallCount:   0,
+			getStringCallCount: 0,
 			expectedStatusCode: http.StatusBadRequest,
 		},
 	}
@@ -78,9 +82,12 @@ func TestHandler_ShortenURLBatch(t *testing.T) {
 				JSON(tt.expectedStatusCode, tt.jsonCallParam).
 				Times(tt.jsonCallCount)
 			mockService.EXPECT().
-				ShortenURLBatch(gomock.Any()).
+				ShortenURLBatch(gomock.Any(), gomock.Any()).
 				Return(tt.serviceReturn, tt.serviceErr).
 				Times(tt.serviceCallCount)
+			mockRequestContext.EXPECT().
+				GetString(gomock.Any()).
+				Times(tt.getStringCallCount)
 
 			h := &Handler{
 				shortener: mockService,

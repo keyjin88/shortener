@@ -24,10 +24,10 @@ func NewURLRepositoryFile(filePath *string) (*URLRepositoryFile, error) {
 	return &urlRepositoryFile, nil
 }
 
-func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (string, error) {
+func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
-		return "", err
+		return storage.ShortenedURL{}, err
 	}
 	scanner := bufio.NewScanner(r.file)
 	for scanner.Scan() {
@@ -35,16 +35,16 @@ func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (string, error) 
 		var temp storage.ShortenedURL
 		err := json.Unmarshal([]byte(line), &temp)
 		if err != nil {
-			return "", err
+			return storage.ShortenedURL{}, err
 		}
 		if temp.ShortURL == shortURL {
-			return temp.OriginalURL, nil
+			return temp, nil
 		}
 	}
 	if err := scanner.Err(); err != nil {
-		return "", err
+		return storage.ShortenedURL{}, err
 	}
-	return "", fmt.Errorf("URL not found: %v", shortURL)
+	return storage.ShortenedURL{}, fmt.Errorf("URL not found: %v", shortURL)
 }
 
 func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error) {
@@ -68,6 +68,30 @@ func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error
 		return "", err
 	}
 	return "", fmt.Errorf("URL not found: %v", originalURL)
+}
+
+func (r *URLRepositoryFile) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
+	_, err := r.file.Seek(0, 0)
+	if err != nil {
+		return nil, err
+	}
+	var userURLs []storage.UsersURLResponse
+	scanner := bufio.NewScanner(r.file)
+	for scanner.Scan() {
+		line := scanner.Text()
+		var temp storage.ShortenedURL
+		err := json.Unmarshal([]byte(line), &temp)
+		if err != nil {
+			return nil, err
+		}
+		if temp.UserID == userID {
+			userURLs = append(userURLs, storage.UsersURLResponse{ShortURL: temp.ShortURL, OriginalURL: temp.OriginalURL})
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		return nil, err
+	}
+	return userURLs, nil
 }
 
 func (r *URLRepositoryFile) SaveBatch(urls *[]storage.ShortenedURL) error {
@@ -121,4 +145,8 @@ func (r *URLRepositoryFile) Ping(ctx context.Context) error {
 	} else {
 		return nil
 	}
+}
+
+func (r *URLRepositoryFile) DeleteRecords(ids []string, userID string) error {
+	return nil
 }

@@ -22,7 +22,8 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while marshalling json"})
 		return
 	}
-	result, err := h.shortener.ShortenURL(req.URL)
+	uid := c.GetString("uid")
+	result, err := h.shortener.ShortenURL(req.URL, uid)
 	response := storage.ShortenURLResponse{Result: result}
 	if err != nil {
 		if err.Error() == "URL already exists" {

@@ -18,13 +18,16 @@ type RequestContext interface {
 	FullPath() string
 	AbortWithStatus(code int)
 	BindJSON(obj any) error
+	GetString(key string) (s string)
 }
 
 //go:generate mockgen -destination=mocks/shorten_service.go -package=mocks . ShortenService
 type ShortenService interface {
-	GetShortenedURLByID(id string) (string, error)
-	ShortenURL(url string) (string, error)
-	ShortenURLBatch(request storage.ShortenURLBatchRequest) ([]storage.ShortenURLBatchResponse, error)
+	GetShortenedURLByID(id string) (storage.ShortenedURL, error)
+	GetShortenedURLByUserID(userID string) ([]storage.UsersURLResponse, error)
+	ShortenURL(url string, userID string) (string, error)
+	ShortenURLBatch(request storage.ShortenURLBatchRequest, userID string) ([]storage.ShortenURLBatchResponse, error)
+	DeleteURLs(req *[]string, userID string) error
 }
 
 type Handler struct {

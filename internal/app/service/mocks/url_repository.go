@@ -47,6 +47,35 @@ func (mr *MockURLRepositoryMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockURLRepository)(nil).Close))
 }
 
+// DeleteRecords mocks base method.
+func (m *MockURLRepository) DeleteRecords(arg0 []string, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteRecords", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteRecords indicates an expected call of DeleteRecords.
+func (mr *MockURLRepositoryMockRecorder) DeleteRecords(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteRecords", reflect.TypeOf((*MockURLRepository)(nil).DeleteRecords), arg0, arg1)
+}
+
+// FindAllByUserID mocks base method.
+func (m *MockURLRepository) FindAllByUserID(arg0 string) ([]storage.UsersURLResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "FindAllByUserID", arg0)
+	ret0, _ := ret[0].([]storage.UsersURLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// FindAllByUserID indicates an expected call of FindAllByUserID.
+func (mr *MockURLRepositoryMockRecorder) FindAllByUserID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "FindAllByUserID", reflect.TypeOf((*MockURLRepository)(nil).FindAllByUserID), arg0)
+}
+
 // FindByOriginalURL mocks base method.
 func (m *MockURLRepository) FindByOriginalURL(arg0 string) (string, error) {
 	m.ctrl.T.Helper()
@@ -63,10 +92,10 @@ func (mr *MockURLRepositoryMockRecorder) FindByOriginalURL(arg0 interface{}) *go
 }
 
 // FindByShortenedURL mocks base method.
-func (m *MockURLRepository) FindByShortenedURL(arg0 string) (string, error) {
+func (m *MockURLRepository) FindByShortenedURL(arg0 string) (storage.ShortenedURL, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "FindByShortenedURL", arg0)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(storage.ShortenedURL)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }

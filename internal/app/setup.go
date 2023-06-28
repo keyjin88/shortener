@@ -7,9 +7,11 @@ import (
 	"github.com/keyjin88/shortener/internal/app/config"
 	"github.com/keyjin88/shortener/internal/app/handlers"
 	"github.com/keyjin88/shortener/internal/app/logger"
+	"github.com/keyjin88/shortener/internal/app/middleware/auth"
 	"github.com/keyjin88/shortener/internal/app/middleware/compressor"
 	loggerMiddleware "github.com/keyjin88/shortener/internal/app/middleware/logger"
 	"github.com/keyjin88/shortener/internal/app/service"
+	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
 	"github.com/keyjin88/shortener/internal/app/storage/postgres"
@@ -55,6 +57,7 @@ func (api *API) setupRouter() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	router := gin.New()
+	router.Use(auth.AuthenticationMiddleware(&api.config.SecretKey))
 	router.Use(compressor.CompressionMiddleware())
 	router.Use(loggerMiddleware.LoggingMiddleware())
 	//Раскомментировать для перехода на штатный логгер gin
@@ -69,6 +72,8 @@ func (api *API) setupRouter() {
 	{
 		apiGroup.POST("/shorten", func(c *gin.Context) { api.handlers.ShortenURLJSON(c) })
 		apiGroup.POST("/shorten/batch", func(c *gin.Context) { api.handlers.ShortenURLBatch(c) })
+		apiGroup.GET("/user/urls", func(c *gin.Context) { api.handlers.GetUserURL(c) })
+		apiGroup.DELETE("/user/urls", func(c *gin.Context) { api.handlers.DeleteURLs(c) })
 	}
 	api.router = router
 }
@@ -84,7 +89,9 @@ func (api *API) configStorage() {
 			logger.Log.Errorf("error while initialising DB Pool: %v", err)
 			return
 		}
-		repository, err := postgres.NewPostgresRepository(dbPool, context.Background())
+		//Правильно ли я понимаю, что этот канал можно не закрывать, так как он открывается на всю жизнь приложения?
+		ch := make(chan storage.UserURLs)
+		repository, err := postgres.NewPostgresRepository(dbPool, context.Background(), ch)
 		if err != nil {
 			logger.Log.Errorf("error while initialising DB: %v", err)
 			return

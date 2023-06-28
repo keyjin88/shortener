@@ -34,11 +34,25 @@ func (m *MockShortenService) EXPECT() *MockShortenServiceMockRecorder {
 	return m.recorder
 }
 
+// DeleteURLs mocks base method.
+func (m *MockShortenService) DeleteURLs(arg0 *[]string, arg1 string) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteURLs", arg0, arg1)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// DeleteURLs indicates an expected call of DeleteURLs.
+func (mr *MockShortenServiceMockRecorder) DeleteURLs(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteURLs", reflect.TypeOf((*MockShortenService)(nil).DeleteURLs), arg0, arg1)
+}
+
 // GetShortenedURLByID mocks base method.
-func (m *MockShortenService) GetShortenedURLByID(arg0 string) (string, error) {
+func (m *MockShortenService) GetShortenedURLByID(arg0 string) (storage.ShortenedURL, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetShortenedURLByID", arg0)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(storage.ShortenedURL)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
@@ -49,32 +63,47 @@ func (mr *MockShortenServiceMockRecorder) GetShortenedURLByID(arg0 interface{}) 
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShortenedURLByID", reflect.TypeOf((*MockShortenService)(nil).GetShortenedURLByID), arg0)
 }
 
-// ShortenURL mocks base method.
-func (m *MockShortenService) ShortenURL(arg0 string) (string, error) {
+// GetShortenedURLByUserID mocks base method.
+func (m *MockShortenService) GetShortenedURLByUserID(arg0 string) ([]storage.UsersURLResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ShortenURL", arg0)
+	ret := m.ctrl.Call(m, "GetShortenedURLByUserID", arg0)
+	ret0, _ := ret[0].([]storage.UsersURLResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetShortenedURLByUserID indicates an expected call of GetShortenedURLByUserID.
+func (mr *MockShortenServiceMockRecorder) GetShortenedURLByUserID(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetShortenedURLByUserID", reflect.TypeOf((*MockShortenService)(nil).GetShortenedURLByUserID), arg0)
+}
+
+// ShortenURL mocks base method.
+func (m *MockShortenService) ShortenURL(arg0, arg1 string) (string, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ShortenURL", arg0, arg1)
 	ret0, _ := ret[0].(string)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ShortenURL indicates an expected call of ShortenURL.
-func (mr *MockShortenServiceMockRecorder) ShortenURL(arg0 interface{}) *gomock.Call {
+func (mr *MockShortenServiceMockRecorder) ShortenURL(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenURL", reflect.TypeOf((*MockShortenService)(nil).ShortenURL), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenURL", reflect.TypeOf((*MockShortenService)(nil).ShortenURL), arg0, arg1)
 }
 
 // ShortenURLBatch mocks base method.
-func (m *MockShortenService) ShortenURLBatch(arg0 storage.ShortenURLBatchRequest) ([]storage.ShortenURLBatchResponse, error) {
+func (m *MockShortenService) ShortenURLBatch(arg0 storage.ShortenURLBatchRequest, arg1 string) ([]storage.ShortenURLBatchResponse, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ShortenURLBatch", arg0)
+	ret := m.ctrl.Call(m, "ShortenURLBatch", arg0, arg1)
 	ret0, _ := ret[0].([]storage.ShortenURLBatchResponse)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // ShortenURLBatch indicates an expected call of ShortenURLBatch.
-func (mr *MockShortenServiceMockRecorder) ShortenURLBatch(arg0 interface{}) *gomock.Call {
+func (mr *MockShortenServiceMockRecorder) ShortenURLBatch(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenURLBatch", reflect.TypeOf((*MockShortenService)(nil).ShortenURLBatch), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ShortenURLBatch", reflect.TypeOf((*MockShortenService)(nil).ShortenURLBatch), arg0, arg1)
 }

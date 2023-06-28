@@ -13,6 +13,7 @@ type Config struct {
 	LogLevel        string `env:"LOG_LEVEL"`
 	FileStoragePath string `env:"FILE_STORAGE_PATH"`
 	DataBaseDSN     string `env:"DATABASE_DSN"`
+	SecretKey       string `env:"SECRET_KEY"`
 }
 
 func NewConfig() *Config {
@@ -27,8 +28,9 @@ func (config *Config) InitConfig() {
 	flag.BoolVar(&config.GinReleaseMode, "grm", false, "gin release mode")
 	flag.StringVar(&config.LogLevel, "ll", "info", "log level")
 	flag.StringVar(&config.FileStoragePath, "f", "/tmp/short-url-db.json", "path to storage")
+	flag.StringVar(&config.SecretKey, "sk", "abcdefghijklmnopqrstuvwxyz123456", "secret key for cryptographic")
 	flag.StringVar(&config.DataBaseDSN, "d", "", "database dsn")
-	//Оставил для локальных тестов
+	// Оставил для локальных тестов
 	//flag.StringVar(&config.DataBaseDSN, "d", "postgres://pgadmin:postgres@localhost:5432/shortener", "database dsn")
 	// парсим переданные серверу аргументы в зарегистрированные переменные
 	flag.Parse()

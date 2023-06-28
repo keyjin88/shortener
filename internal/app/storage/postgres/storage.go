@@ -9,10 +9,11 @@ import (
 )
 
 type URLRepositoryPostgres struct {
-	dbPool *pgxpool.Pool
+	dbPool       *pgxpool.Pool
+	urlsToDelete chan storage.UserURLs
 }
 
-func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context) (*URLRepositoryPostgres, error) {
+func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context, toDeleteChan chan storage.UserURLs) (*URLRepositoryPostgres, error) {
 	query := `create table if not exists public.shortened_url
 (
     id             serial
@@ -21,8 +22,8 @@ func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context) (*URLReposit
     short_url      varchar,
     original_url   varchar
         unique,
-    created_at     date    not null,
-    updated_at     date    not null,
+    created_at     timestamp    not null,
+    updated_at     timestamp    not null,
     correlation_id varchar,
     is_deleted     boolean not null default false
 );`
@@ -30,7 +31,8 @@ func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context) (*URLReposit
 	if err != nil {
 		return nil, err
 	}
-	return &URLRepositoryPostgres{dbPool: pool}, nil
+	go WorkerDeleteURLs(toDeleteChan, pool)
+	return &URLRepositoryPostgres{dbPool: pool, urlsToDelete: toDeleteChan}, nil
 }
 
 func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
@@ -118,10 +120,16 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 
 	defer func() {
 		if p := recover(); p != nil {
-			tx.Rollback(context.Background())
+			err := tx.Rollback(context.Background())
+			if err != nil {
+				return
+			}
 			logger.Log.Error(p)
 		} else if err != nil {
-			tx.Rollback(context.Background())
+			err := tx.Rollback(context.Background())
+			if err != nil {
+				return
+			}
 		} else {
 			err = tx.Commit(context.Background())
 		}
@@ -131,37 +139,16 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 }
 
 func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userID string) error {
-	sql := `UPDATE shortened_url SET is_deleted = true WHERE short_url = ANY($1) AND user_id = $2`
-	ch := make(chan []string)
-	defer close(ch)
-
-	// Запускаем горутину для фан-ин паттерна
-	go fanIn(ch, func(ids []string) error {
-		// Выполняем множественное обновление
-		_, err := r.dbPool.Exec(context.Background(), sql, ids, userID)
-		if err != nil {
-			logger.Log.Infof("error while deleting: %e", err)
-			return err
-		}
-		return nil
-	})
-	// Разбиваем слайс на части для более эффективного обновления
-	batchSize := 100
-	for i := 0; i < len(ids); i += batchSize {
-		end := i + batchSize
-		if end > len(ids) {
-			end = len(ids)
-		}
-		ch <- ids[i:end]
-	}
+	r.urlsToDelete <- storage.UserURLs{UserID: userID, URLs: ids}
 	return nil
 }
 
-func fanIn(ch <-chan []string, f func([]string) error) {
-	// Выполняем обновление для каждого блока данных, полученного из канала
-	for ids := range ch {
-		if err := f(ids); err != nil {
-			logger.Log.Infof("error while deleting in fanin: %e", err)
+func WorkerDeleteURLs(ch <-chan storage.UserURLs, pool *pgxpool.Pool) {
+	for userUrls := range ch {
+		sql := `UPDATE shortened_url SET is_deleted = true, updated_at = $1  WHERE short_url = ANY($2) AND user_id = $3`
+		_, err := pool.Exec(context.Background(), sql, time.Now(), userUrls.URLs, userUrls.UserID)
+		if err != nil {
+			logger.Log.Infof("error while deleting: %e", err)
 		}
 	}
 }

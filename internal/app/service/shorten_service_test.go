@@ -5,6 +5,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/keyjin88/shortener/internal/app/service/mocks"
 	"github.com/keyjin88/shortener/internal/app/storage"
+	"github.com/keyjin88/shortener/internal/app/storage/inmem"
 	"github.com/stretchr/testify/assert"
 	"testing"
 )
@@ -263,5 +264,18 @@ func TestShortenService_DeleteURLs(t *testing.T) {
 			err := s.DeleteURLs(&tt.urls, tt.userID)
 			assert.Equal(t, tt.error, err)
 		})
+	}
+}
+
+func BenchmarkGenerateShortURL(b *testing.B) {
+	var repo = inmem.NewURLRepositoryInMem()
+	s := &ShortenService{
+		urlRepository: repo,
+	}
+	for i := 0; i < b.N; i++ {
+		_, err := s.generateShortenURL()
+		if err != nil {
+			return
+		}
 	}
 }

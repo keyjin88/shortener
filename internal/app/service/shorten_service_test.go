@@ -268,10 +268,12 @@ func TestShortenService_DeleteURLs(t *testing.T) {
 }
 
 func BenchmarkGenerateShortURL(b *testing.B) {
+	b.StopTimer() // останавливаем таймер
 	var repo = inmem.NewURLRepositoryInMem()
 	s := &ShortenService{
 		urlRepository: repo,
 	}
+	b.StartTimer() // возобновляем таймер
 	for i := 0; i < b.N; i++ {
 		_, err := s.generateShortenURL()
 		if err != nil {

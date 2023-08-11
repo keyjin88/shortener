@@ -14,7 +14,7 @@ type URLRepositoryInMem struct {
 
 func NewURLRepositoryInMem() *URLRepositoryInMem {
 	return &URLRepositoryInMem{
-		inMemStorage: make(map[string]storage.ShortenedURL),
+		inMemStorage: make(map[string]storage.ShortenedURL, 1000),
 	}
 }
 

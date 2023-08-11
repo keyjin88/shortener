@@ -1,0 +1,7 @@
+Type: inuse_space
+Time: Aug 11, 2023 at 11:53am (MSK)
+Showing nodes accounting for 517.33kB, 100% of 517.33kB total
+      flat  flat%   sum%        cum   cum%
+  517.33kB   100%   100%   517.33kB   100%  regexp/syntax.(*compiler).inst (inline)
+         0     0%   100%   517.33kB   100%  regexp/syntax.(*compiler).compile
+         0     0%   100%   517.33kB   100%  regexp/syntax.(*compiler).quest

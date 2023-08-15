@@ -8,39 +8,45 @@ import (
 	"strconv"
 )
 
+// URLRepositoryInMem is in memory repository
 type URLRepositoryInMem struct {
 	inMemStorage map[string]storage.ShortenedURL
 }
 
+// NewURLRepositoryInMem creates a new URLRepositoryInMem
 func NewURLRepositoryInMem() *URLRepositoryInMem {
 	return &URLRepositoryInMem{
 		inMemStorage: make(map[string]storage.ShortenedURL, 1000),
 	}
 }
 
-func (ur *URLRepositoryInMem) SaveBatch(urls *[]storage.ShortenedURL) error {
+// SaveBatch saves a batch of USRs to storage
+func (r *URLRepositoryInMem) SaveBatch(urls *[]storage.ShortenedURL) error {
 	for _, url := range *urls {
-		ur.inMemStorage[url.ShortURL] = url
+		r.inMemStorage[url.ShortURL] = url
 	}
 	return nil
 }
 
-func (ur *URLRepositoryInMem) Save(shortenedURL *storage.ShortenedURL) error {
-	shortenedURL.UUID = strconv.Itoa(len(ur.inMemStorage))
-	ur.inMemStorage[shortenedURL.ShortURL] = *shortenedURL
+// Save method for saving URL in storage
+func (r *URLRepositoryInMem) Save(shortenedURL *storage.ShortenedURL) error {
+	shortenedURL.UUID = strconv.Itoa(len(r.inMemStorage))
+	r.inMemStorage[shortenedURL.ShortURL] = *shortenedURL
 	return nil
 }
 
-func (ur *URLRepositoryInMem) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
-	url, ok := ur.inMemStorage[shortURL]
+// FindByShortenedURL find URL by given shortened string in memory
+func (r *URLRepositoryInMem) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
+	url, ok := r.inMemStorage[shortURL]
 	if !ok {
 		return storage.ShortenedURL{}, fmt.Errorf("URL not found: %v", shortURL)
 	}
 	return url, nil
 }
 
-func (ur *URLRepositoryInMem) FindByOriginalURL(originalURL string) (string, error) {
-	for key, value := range ur.inMemStorage {
+// FindByOriginalURL find shortened URL by original URL
+func (r *URLRepositoryInMem) FindByOriginalURL(originalURL string) (string, error) {
+	for key, value := range r.inMemStorage {
 		if value.OriginalURL == originalURL {
 			return key, nil
 		}
@@ -48,9 +54,10 @@ func (ur *URLRepositoryInMem) FindByOriginalURL(originalURL string) (string, err
 	return "", errors.New("URL not found: " + originalURL)
 }
 
-func (ur *URLRepositoryInMem) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
+// FindAllByUserID find URLs by user ID
+func (r *URLRepositoryInMem) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
 	var userURLs []storage.UsersURLResponse
-	for _, value := range ur.inMemStorage {
+	for _, value := range r.inMemStorage {
 		if value.UserID == userID {
 			userURLs = append(userURLs, storage.UsersURLResponse{ShortURL: value.ShortURL, OriginalURL: value.OriginalURL})
 		}
@@ -59,21 +66,29 @@ func (ur *URLRepositoryInMem) FindAllByUserID(userID string) ([]storage.UsersURL
 }
 
 // RestoreData восстанавливает состояние БД
-func (ur *URLRepositoryInMem) RestoreData(data []storage.ShortenedURL) {
+func (r *URLRepositoryInMem) RestoreData(data []storage.ShortenedURL) {
 	for _, e := range data {
-		ur.inMemStorage[e.ShortURL] = e
+		r.inMemStorage[e.ShortURL] = e
 	}
 }
 
-func (ur *URLRepositoryInMem) Close() {
+// Close method closes the repository
+func (r *URLRepositoryInMem) Close() {
 	//нужен для реализации интерфейса
 }
 
-func (ur *URLRepositoryInMem) Ping(ctx context.Context) error {
-	//нужен для реализации интерфейса
+// Ping method pings storage
+func (r *URLRepositoryInMem) Ping(ctx context.Context) error {
+	if r.inMemStorage == nil {
+		return errors.New("storage is not initialized")
+	}
 	return nil
 }
 
-func (ur *URLRepositoryInMem) DeleteRecords(ids []string, userID string) error {
+// Delete method deleted URLs by given IDs
+func (r *URLRepositoryInMem) Delete(ids []string, userID string) error {
+	for _, id := range ids {
+		delete(r.inMemStorage, id)
+	}
 	return nil
 }

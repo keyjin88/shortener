@@ -5,11 +5,13 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage"
 )
 
+// ShortenService is a service for shortening URLs
 type ShortenService struct {
 	urlRepository URLRepository
 	config        *Config
 }
 
+// Config is a cinfig for shortening URLs
 type Config struct {
 	BaseAddress string //base address for shortened url
 }
@@ -23,5 +25,5 @@ type URLRepository interface {
 	SaveBatch(urls *[]storage.ShortenedURL) error
 	Close()
 	Ping(ctx context.Context) error
-	DeleteRecords(ids []string, userID string) error
+	Delete(ids []string, userID string) error
 }

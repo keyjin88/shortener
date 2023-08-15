@@ -9,6 +9,7 @@ import (
 	"time"
 )
 
+// NewShortenService creates a new shortener.
 func NewShortenService(urlRepository URLRepository, baseAddress string) *ShortenService {
 	return &ShortenService{
 		urlRepository: urlRepository,
@@ -18,10 +19,12 @@ func NewShortenService(urlRepository URLRepository, baseAddress string) *Shorten
 	}
 }
 
+// GetShortenedURLByID returns a URL by given ID.
 func (s *ShortenService) GetShortenedURLByID(id string) (storage.ShortenedURL, error) {
 	return s.urlRepository.FindByShortenedURL(id)
 }
 
+// GetShortenedURLByUserID returns a URL by given user ID.
 func (s *ShortenService) GetShortenedURLByUserID(userID string) ([]storage.UsersURLResponse, error) {
 	usersURLResponses, err := s.urlRepository.FindAllByUserID(userID)
 	if err != nil {
@@ -33,6 +36,7 @@ func (s *ShortenService) GetShortenedURLByUserID(userID string) ([]storage.Users
 	return usersURLResponses, nil
 }
 
+// ShortenURL returns shorten URL by given original URL and user ID.
 func (s *ShortenService) ShortenURL(url string, userID string) (string, error) {
 	keyStr, err := s.generateShortenURL()
 	if err != nil {
@@ -60,6 +64,7 @@ func (s *ShortenService) ShortenURL(url string, userID string) (string, error) {
 	return s.config.BaseAddress + "/" + shortURL.ShortURL, err
 }
 
+// ShortenURLBatch returns a short URL batch for the given URLs
 func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest, userID string) ([]storage.ShortenURLBatchResponse, error) {
 	var urlArray []storage.ShortenedURL
 	for _, url := range request {
@@ -90,8 +95,9 @@ func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest,
 	return result, nil
 }
 
+// DeleteURLs deletes the specified URLs from the repository
 func (s *ShortenService) DeleteURLs(req *[]string, userID string) error {
-	return s.urlRepository.DeleteRecords(*req, userID)
+	return s.urlRepository.Delete(*req, userID)
 }
 
 func (s *ShortenService) generateShortenURL() (string, error) {

@@ -10,13 +10,8 @@ func ExampleShortenService_ShortenURL() {
 		urlRepository: inmem.NewURLRepositoryInMem(),
 		config:        &Config{},
 	}
-
-	// Вызываем функцию ShortenURL с примером
 	_, err := service.ShortenURL("http://example.com", "24")
-
-	// Проверяем результаты
 	fmt.Printf("Error: %v\n", err)
-
 	// Output:
 	// Error: <nil>
 }

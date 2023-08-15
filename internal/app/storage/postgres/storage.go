@@ -8,11 +8,13 @@ import (
 	"time"
 )
 
+// URLRepositoryPostgres is Postgres repository
 type URLRepositoryPostgres struct {
 	dbPool       *pgxpool.Pool
 	urlsToDelete chan storage.UserURLs
 }
 
+// NewPostgresRepository creates a new URLRepositoryPostgres
 func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context, toDeleteChan chan storage.UserURLs) (*URLRepositoryPostgres, error) {
 	query := `create table if not exists public.shortened_url
 (
@@ -35,6 +37,7 @@ func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context, toDeleteChan
 	return &URLRepositoryPostgres{dbPool: pool, urlsToDelete: toDeleteChan}, nil
 }
 
+// FindByShortenedURL find URL by given shortened string in DB
 func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	ctx := context.Background()
 	query := `SELECT original_url, is_deleted FROM public.shortened_url WHERE short_url = $1`
@@ -47,6 +50,7 @@ func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (storage.Sho
 	return storage.ShortenedURL{OriginalURL: originalURL, IsDeleted: isDeleted}, nil
 }
 
+// FindByOriginalURL find shortened URL by original URL
 func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, error) {
 	ctx := context.Background()
 	query := `SELECT short_url FROM public.shortened_url WHERE original_url = $1`
@@ -58,6 +62,7 @@ func (r *URLRepositoryPostgres) FindByOriginalURL(originalURL string) (string, e
 	return shortURL, nil
 }
 
+// FindAllByUserID find URLs by user ID
 func (r *URLRepositoryPostgres) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
 	ctx := context.Background()
 	query := `SELECT short_url, original_url FROM shortened_url WHERE user_id = $1`
@@ -82,6 +87,7 @@ func (r *URLRepositoryPostgres) FindAllByUserID(userID string) ([]storage.UsersU
 	return userURLs, nil
 }
 
+// Save method for saving URL in storage
 func (r *URLRepositoryPostgres) Save(shortenedURL *storage.ShortenedURL) error {
 	ctx := context.Background()
 	now := time.Now()
@@ -99,6 +105,7 @@ func (r *URLRepositoryPostgres) Save(shortenedURL *storage.ShortenedURL) error {
 	return nil
 }
 
+// SaveBatch saves a batch of USRs to storage
 func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 	ctx := context.Background()
 	tx, err := r.dbPool.Begin(ctx)
@@ -138,11 +145,13 @@ func (r *URLRepositoryPostgres) SaveBatch(urls *[]storage.ShortenedURL) error {
 	return nil
 }
 
-func (r *URLRepositoryPostgres) DeleteRecords(ids []string, userID string) error {
+// Delete method deleted URLs by given IDs
+func (r *URLRepositoryPostgres) Delete(ids []string, userID string) error {
 	r.urlsToDelete <- storage.UserURLs{UserID: userID, URLs: ids}
 	return nil
 }
 
+// WorkerDeleteURLs is used to async delete URLs
 func WorkerDeleteURLs(ch <-chan storage.UserURLs, pool *pgxpool.Pool) {
 	for userUrls := range ch {
 		sql := `UPDATE shortened_url SET is_deleted = true, updated_at = $1  WHERE short_url = ANY($2) AND user_id = $3`
@@ -153,10 +162,12 @@ func WorkerDeleteURLs(ch <-chan storage.UserURLs, pool *pgxpool.Pool) {
 	}
 }
 
+// Close method closes the repository
 func (r *URLRepositoryPostgres) Close() {
 	r.dbPool.Close()
 }
 
+// Ping method pings storage
 func (r *URLRepositoryPostgres) Ping(ctx context.Context) error {
 	return r.dbPool.Ping(ctx)
 }

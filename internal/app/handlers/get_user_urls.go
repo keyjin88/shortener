@@ -5,6 +5,17 @@ import (
 	"net/http"
 )
 
+// GetUserURL is a function that handles a request to retrieve the original URL associated with a user.
+// It expects a RequestContext object as the input parameter.
+//
+// If the "uid" parameter in the request context is empty, it logs an informational message and returns an unauthorized status.
+//
+// If there is an error while retrieving the shortened URL associated with the provided user ID,
+// it logs an error message and returns a bad request status.
+//
+// If there are no original URLs found for the user, it logs an informational message and returns a no content status.
+//
+// If everything is successful, it returns the original URL associated with the user in JSON format with a status OK.
 func (h *Handler) GetUserURL(context RequestContext) {
 	uid := context.GetString("uid")
 	if uid == "" {

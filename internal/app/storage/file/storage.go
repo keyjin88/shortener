@@ -10,10 +10,12 @@ import (
 	"os"
 )
 
+// URLRepositoryFile is in file repository
 type URLRepositoryFile struct {
 	file *os.File
 }
 
+// NewURLRepositoryFile creates a new URLRepositoryFile
 func NewURLRepositoryFile(filePath *string) (*URLRepositoryFile, error) {
 	file, err := os.OpenFile(*filePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
 	if err != nil {
@@ -24,6 +26,7 @@ func NewURLRepositoryFile(filePath *string) (*URLRepositoryFile, error) {
 	return &urlRepositoryFile, nil
 }
 
+// FindByShortenedURL find URL by given shortened string in file
 func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -47,6 +50,7 @@ func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (storage.Shorten
 	return storage.ShortenedURL{}, fmt.Errorf("URL not found: %v", shortURL)
 }
 
+// FindByOriginalURL find shortened URL by original URL
 func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -70,6 +74,7 @@ func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error
 	return "", fmt.Errorf("URL not found: %v", originalURL)
 }
 
+// FindAllByUserID find URLs by user ID
 func (r *URLRepositoryFile) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -94,6 +99,7 @@ func (r *URLRepositoryFile) FindAllByUserID(userID string) ([]storage.UsersURLRe
 	return userURLs, nil
 }
 
+// SaveBatch saves a batch of USRs to storage
 func (r *URLRepositoryFile) SaveBatch(urls *[]storage.ShortenedURL) error {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -113,6 +119,7 @@ func (r *URLRepositoryFile) SaveBatch(urls *[]storage.ShortenedURL) error {
 	return nil
 }
 
+// Save method for saving URL in storage
 func (r *URLRepositoryFile) Save(data *storage.ShortenedURL) error {
 	urlJSONAsBytes, err := json.Marshal(data)
 	if err != nil {
@@ -131,6 +138,7 @@ func (r *URLRepositoryFile) Save(data *storage.ShortenedURL) error {
 	return nil
 }
 
+// Close method closes the repository
 func (r *URLRepositoryFile) Close() {
 	err := r.file.Close()
 	if err != nil {
@@ -139,6 +147,7 @@ func (r *URLRepositoryFile) Close() {
 	}
 }
 
+// Ping method pings storage
 func (r *URLRepositoryFile) Ping(ctx context.Context) error {
 	if _, err := os.Stat(r.file.Name()); os.IsNotExist(err) {
 		return fmt.Errorf("file not found: %s", r.file.Name())
@@ -147,6 +156,67 @@ func (r *URLRepositoryFile) Ping(ctx context.Context) error {
 	}
 }
 
-func (r *URLRepositoryFile) DeleteRecords(ids []string, userID string) error {
+// Delete method deleted URLs by given IDs
+func (r *URLRepositoryFile) Delete(ids []string, userID string) error {
+	// Открыть файл для чтения и записи
+	file, err := os.OpenFile(r.file.Name(), os.O_RDWR, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Прочитать содержимое файла в память
+	scanner := bufio.NewScanner(file)
+	var lines []string
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+	}
+	if err := scanner.Err(); err != nil {
+		return err
+	}
+	// Проанализировать каждую строку в файле
+	for i, line := range lines {
+		// Распаковать JSON в структуру
+		var url storage.ShortenedURL
+		if err := json.Unmarshal([]byte(line), &url); err != nil {
+			return err
+		}
+
+		// Проверить, соответствует ли идентификатор URL одному из идентификаторов, переданных в `ids`
+		for _, id := range ids {
+			if url.ShortURL == id {
+				// Пометить запись как удаленную
+				url.IsDeleted = true
+
+				// Записать измененную структуру обратно в JSON
+				updatedLine, err := json.Marshal(url)
+				if err != nil {
+					return err
+				}
+
+				lines[i] = string(updatedLine)
+				break
+			}
+		}
+	}
+
+	// Записать изменения обратно в файл
+	if err := file.Truncate(0); err != nil {
+		return err
+	}
+	if _, err := file.Seek(0, 0); err != nil {
+		return err
+	}
+	writer := bufio.NewWriter(file)
+	for _, line := range lines {
+		_, err := writer.WriteString(line + "\n")
+		if err != nil {
+			return err
+		}
+	}
+	if err := writer.Flush(); err != nil {
+		return err
+	}
+
 	return nil
 }

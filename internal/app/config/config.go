@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// Config represents a configuration of application
 type Config struct {
 	ServerAddress   string `env:"SERVER_ADDRESS"`
 	BaseAddress     string `env:"BASE_URL"`
@@ -16,6 +17,7 @@ type Config struct {
 	SecretKey       string `env:"SECRET_KEY"`
 }
 
+// NewConfig creates a new Config instance with the given parameters
 func NewConfig() *Config {
 	return &Config{}
 }

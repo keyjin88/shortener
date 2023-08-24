@@ -6,4 +6,7 @@ build:
 test:
 	go test ./...
 
+test-covered:
+	  go test -covermode=count ./...
+
 .DEFAULT_GOAL:= build

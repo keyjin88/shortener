@@ -13,12 +13,14 @@ import (
 	"time"
 )
 
+// Cookie represents a cookie used for authorization
 type Cookie struct {
 	encryptedCookie string
 	expiration      time.Time
 	uid             string
 }
 
+// AuthenticationMiddleware is a middleware to authenticate users
 func AuthenticationMiddleware(secretKey *string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		cookie, err := c.Cookie("auth")

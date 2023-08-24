@@ -6,6 +6,15 @@ import (
 	"net/http"
 )
 
+// GetShortenedURL retrieves the shortened URL by ID from the Handler's shortener instance
+// and performs necessary actions based on the retrieved data.
+//
+// If the URL is not found by the given ID, it logs a corresponding error message,
+// responds with a Bad Request status and a message indicating the URL was not found.
+//
+// If the retrieved URL is marked as deleted, it aborts the request and responds with a Gone status.
+//
+// Otherwise, it redirects the request to the original URL associated with the retrieved shortened URL.
 func (h *Handler) GetShortenedURL(context RequestContext) {
 	id := context.Param("id")
 	shortenURL, err := h.shortener.GetShortenedURLByID(id)

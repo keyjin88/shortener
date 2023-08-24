@@ -6,6 +6,7 @@ import (
 	"strings"
 )
 
+// CompressionMiddleware is a middleware that compresses and decompress data
 func CompressionMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Принимаем запросы в сжатом формате

@@ -6,6 +6,8 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage"
 )
 
+// RequestContext represents a request context and hides gin.Context
+//
 //go:generate mockgen -destination=mocks/get_shortened_url.go -package=mocks . RequestContext
 type RequestContext interface {
 	String(code int, format string, values ...any)
@@ -21,6 +23,8 @@ type RequestContext interface {
 	GetString(key string) (s string)
 }
 
+// ShortenService is interface for shortening URLs
+//
 //go:generate mockgen -destination=mocks/shorten_service.go -package=mocks . ShortenService
 type ShortenService interface {
 	GetShortenedURLByID(id string) (storage.ShortenedURL, error)
@@ -30,11 +34,13 @@ type ShortenService interface {
 	DeleteURLs(req *[]string, userID string) error
 }
 
+// Handler is a struct of handler
 type Handler struct {
 	shortener ShortenService
 	pinger    driver.Pinger
 }
 
+// NewHandler returns a new Handler with shortener and pinger configured
 func NewHandler(shortener *service.ShortenService, pinger driver.Pinger) *Handler {
 	return &Handler{
 		shortener: shortener,

@@ -8,6 +8,11 @@ import (
 	"net/http"
 )
 
+// ShortenURLJSON is a method that handles shortening the given URL in JSON format.
+// It reads the request data, unmarshals it into a ShortenURLRequest object, and then calls the shortener's ShortenURL method.
+// If the URL already exists, it returns an HTTP status code of 409 (Conflict) with the existing short URL.
+// If there are any errors during the process, it returns an appropriate HTTP status code and error message.
+// Finally, it returns the shortened URL in JSON format.
 func (h *Handler) ShortenURLJSON(c RequestContext) {
 	var req storage.ShortenURLRequest
 	requestBytes, err := c.GetRawData()

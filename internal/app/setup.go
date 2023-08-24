@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"github.com/gin-contrib/pprof"
 	"github.com/gin-gonic/gin"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/keyjin88/shortener/internal/app/config"
@@ -57,6 +58,7 @@ func (api *API) setupRouter() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	router := gin.New()
+	pprof.Register(router)
 	router.Use(auth.AuthenticationMiddleware(&api.config.SecretKey))
 	router.Use(compressor.CompressionMiddleware())
 	router.Use(loggerMiddleware.LoggingMiddleware())

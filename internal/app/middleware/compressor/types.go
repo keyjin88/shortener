@@ -18,6 +18,7 @@ func newCompressWriter(w http.ResponseWriter) *compressWriter {
 	}
 }
 
+// Close closes the compressor writer
 func (c *compressWriter) Close() error {
 	return c.gzipWriter.Close()
 }
@@ -39,10 +40,12 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	}, nil
 }
 
+// Read reads compressed data from the compressor reader
 func (c *compressReader) Read(p []byte) (n int, err error) {
 	return c.gzipReader.Read(p)
 }
 
+// Close closes the compressor reader
 func (c *compressReader) Close() error {
 	if err := c.reader.Close(); err != nil {
 		return err

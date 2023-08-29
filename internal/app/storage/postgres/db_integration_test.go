@@ -1,3 +1,6 @@
+//go:build integration_tests
+// +build integration_tests
+
 package postgres
 
 import (
@@ -185,12 +188,12 @@ func TestURLRepositoryPostgres_Save(t *testing.T) {
 	dsn := getDSN()
 	tests := []struct {
 		name         string
-		shortenedUrl *storage.ShortenedURL
+		shortenedURL *storage.ShortenedURL
 		ExpectedErr  error
 	}{
 		{
 			name: "save success",
-			shortenedUrl: &storage.ShortenedURL{
+			shortenedURL: &storage.ShortenedURL{
 				UserID:      "userId",
 				UUID:        uuid.NewString(),
 				ShortURL:    "shortUrl",
@@ -207,11 +210,14 @@ func TestURLRepositoryPostgres_Save(t *testing.T) {
 	}
 	ch := make(chan storage.UserURLs)
 	repository, err := NewPostgresRepository(dbPool, context.Background(), ch)
+	if err != nil {
+		logger.Log.Errorf("failed to create new Postgres Repository: %w", err)
+	}
 	defer repository.Close()
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err2 := repository.Save(tt.shortenedUrl)
+			err2 := repository.Save(tt.shortenedURL)
 			if err2 != nil {
 				logger.Log.Infof("failed to save in DB")
 			}

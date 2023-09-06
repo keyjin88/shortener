@@ -75,12 +75,19 @@ func run(pass *analysis.Pass) (interface{}, error) {
 	}
 
 	inspct.Preorder(nodeFilter, func(node ast.Node) {
-		callExpr := node.(*ast.CallExpr)
-		if fun, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
-			if ident, ok := fun.X.(*ast.Ident); ok && ident.Name == "os" && fun.Sel.Name == "Exit" {
-				pass.Reportf(callExpr.Pos(), "прямой вызов os.Exit в функции main пакета main запрещен")
-			}
+		callExpr, ok := node.(*ast.CallExpr)
+		if !ok {
+			return
 		}
+		fun, ok := callExpr.Fun.(*ast.SelectorExpr)
+		if !ok {
+			return
+		}
+		ident, ok := fun.X.(*ast.Ident)
+		if !ok || ident.Name != "os" || fun.Sel.Name != "Exit" {
+			return
+		}
+		pass.Reportf(callExpr.Pos(), "прямой вызов os.Exit в функции main пакета main запрещен")
 	})
 
 	return nil, nil

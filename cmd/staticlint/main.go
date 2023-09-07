@@ -54,7 +54,7 @@ func main() {
 	mychecks = append(
 		mychecks,
 		exitAnalizer,
-		//стандартных статических анализаторов пакета
+		// стандартных статических анализаторов пакета
 		printf.Analyzer,
 		shadow.Analyzer,
 		structtag.Analyzer,

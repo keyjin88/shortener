@@ -36,8 +36,8 @@ func (config *Config) InitConfig() {
 	flag.StringVar(&config.SecretKey, "sk", "abcdefghijklmnopqrstuvwxyz123456", "secret key for cryptographic")
 	flag.StringVar(&config.DataBaseDSN, "d", "", "database dsn")
 	flag.BoolVar(&config.HTTPSEnable, "s", false, "https mode")
-	flag.StringVar(&config.PathToCert, "-ptc", "path/to/cert.pem", "Path to Certificate")
-	flag.StringVar(&config.PathToKey, "-ptk", "path/to/key.pem", "Path to Key")
+	flag.StringVar(&config.PathToCert, "ptc", "path/to/cert.pem", "Path to Certificate")
+	flag.StringVar(&config.PathToKey, "ptk", "path/to/key.pem", "Path to Key")
 
 	// Оставил для локальных тестов
 	//flag.StringVar(&config.DataBaseDSN, "d", "postgres://pgadmin:postgres@localhost:5432/shortener", "database dsn")

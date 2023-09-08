@@ -1,8 +1,6 @@
 package config
 
 import (
-	"crypto/rand"
-	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"github.com/caarlos0/env/v6"
@@ -39,12 +37,7 @@ func (config *Config) InitConfig() {
 	flag.BoolVar(&config.GinReleaseMode, "grm", false, "gin release mode")
 	flag.StringVar(&config.LogLevel, "ll", "info", "log level")
 	flag.StringVar(&config.FileStoragePath, "f", "/tmp/short-url-db.json", "path to storage")
-	secretKey, genSecretErr := GenSecretKey(32)
-	if genSecretErr != nil {
-		secretKey = "abcdefghijklmnopqrstuvwxyz123456"
-		logger.Log.Errorf("error while generate secret key")
-	}
-	flag.StringVar(&config.SecretKey, "sk", secretKey, "secret key for cryptographic")
+	flag.StringVar(&config.SecretKey, "sk", "abcdefghijklmnopqrstuvwxyz123456", "secret key for cryptographic")
 	flag.StringVar(&config.DataBaseDSN, "d", "", "database dsn")
 	flag.BoolVar(&config.HTTPSEnable, "s", false, "https mode")
 	flag.StringVar(&config.PathToCert, "ptc", "path/to/cert.pem", "Path to Certificate")
@@ -70,14 +63,4 @@ func (config *Config) InitConfig() {
 	if err != nil {
 		logger.Log.Errorf("Error parsing config: %v", err)
 	}
-}
-
-// GenSecretKey генерирует секретный ключ и возвращает его в виде Base64-строки.
-func GenSecretKey(n int) (string, error) {
-	data := make([]byte, n)
-	_, err := rand.Read(data)
-	if err != nil {
-		return ``, err
-	}
-	return base64.StdEncoding.EncodeToString(data), nil
 }

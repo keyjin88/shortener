@@ -35,10 +35,13 @@ func TestHandler_GetShortenedURLWithMock(t *testing.T) {
 		expectedBody         string
 	}{
 		{
-			name:                 "Get successfully",
-			shortenURL:           "ShortenURL",
-			originalURL:          "https://www.test.ru",
-			serviceReturn:        getShortenURLReturn{result: storage.ShortenedURL{OriginalURL: "https://www.test.ru"}, error: nil},
+			name:        "Get successfully",
+			shortenURL:  "ShortenURL",
+			originalURL: "https://www.test.ru",
+			serviceReturn: getShortenURLReturn{
+				result: storage.ShortenedURL{OriginalURL: "https://www.test.ru"},
+				error:  nil,
+			},
 			expectedRedirectCall: 1,
 			expectedStringCall:   0,
 			expectedCode:         http.StatusTemporaryRedirect,

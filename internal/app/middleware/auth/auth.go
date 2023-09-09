@@ -6,33 +6,44 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"github.com/pkg/errors"
+
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/keyjin88/shortener/internal/app/logger"
 	"io"
 	"net/http"
 	"time"
 )
 
-// Cookie represents a cookie used for authorization
+const errorCreatingCipher = "error while creating cipher"
+
+// Cookie represents a cookie used for authorization.
 type Cookie struct {
 	encryptedCookie string
 	expiration      time.Time
 	uid             string
 }
 
-// AuthenticationMiddleware is a middleware to authenticate users
+// AuthenticationMiddleware is a middleware to authenticate users.
 func AuthenticationMiddleware(secretKey *string) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		cookie, err := c.Cookie("auth")
+		const auth = "auth"
+		const generateCookieErrorTemplate = "error while generate new cookie: %v"
+		cookie, err := c.Cookie(auth)
+		const key = "uid"
 		if err != nil {
 			// Куки не существует, выдаём новую
 			generatedCookie, err := generateCookie(secretKey)
 			if err != nil {
-				c.AbortWithError(http.StatusBadRequest, err)
+				withError := c.AbortWithError(http.StatusBadRequest, err)
+				if withError != nil {
+					logger.Log.Infof(generateCookieErrorTemplate, err)
+				}
 				return
 			}
-			c.SetCookie("auth", generatedCookie.encryptedCookie, int(generatedCookie.expiration.Unix()), "/", "", false, true)
-			c.Set("uid", generatedCookie.uid)
+			c.SetCookie(auth, generatedCookie.encryptedCookie, int(generatedCookie.expiration.Unix()), "/", "", false, true)
+			c.Set(key, generatedCookie.uid)
 			c.Next()
 			return
 		}
@@ -43,13 +54,16 @@ func AuthenticationMiddleware(secretKey *string) gin.HandlerFunc {
 			// Куки не проходит проверку, выдаём новую
 			generatedCookie, err := generateCookie(secretKey)
 			if err != nil {
-				c.AbortWithError(http.StatusBadRequest, err)
+				withError := c.AbortWithError(http.StatusBadRequest, err)
+				if withError != nil {
+					logger.Log.Infof(generateCookieErrorTemplate, err)
+				}
 				return
 			}
-			c.SetCookie("auth", generatedCookie.encryptedCookie, int(generatedCookie.expiration.Unix()), "/", "", false, true)
+			c.SetCookie(auth, generatedCookie.encryptedCookie, int(generatedCookie.expiration.Unix()), "/", "", false, true)
 		}
 		// Передаём уникальный идентификатор пользователя в следующий middleware/handler
-		c.Set("uid", uid)
+		c.Set(key, uid)
 		c.Next()
 	}
 }
@@ -57,12 +71,12 @@ func AuthenticationMiddleware(secretKey *string) gin.HandlerFunc {
 func encryptCookie(cookieValue string, secretKey []byte) (string, error) {
 	block, err := aes.NewCipher(secretKey)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, errorCreatingCipher)
 	}
 	ciphertext := make([]byte, aes.BlockSize+len(cookieValue))
 	iv := ciphertext[:aes.BlockSize]
 	if _, err := io.ReadFull(rand.Reader, iv); err != nil {
-		return "", err
+		return "", errors.Wrap(err, "error while reading cookie")
 	}
 	stream := cipher.NewCFBEncrypter(block, iv)
 	stream.XORKeyStream(ciphertext[aes.BlockSize:], []byte(cookieValue))
@@ -72,11 +86,11 @@ func encryptCookie(cookieValue string, secretKey []byte) (string, error) {
 func decryptCookie(cipherText string, secretKey []byte) (string, error) {
 	ciphertext, err := base64.URLEncoding.DecodeString(cipherText)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, "error while decode string")
 	}
 	block, err := aes.NewCipher(secretKey)
 	if err != nil {
-		return "", err
+		return "", errors.Wrap(err, errorCreatingCipher)
 	}
 	if len(ciphertext) < aes.BlockSize {
 		return "", fmt.Errorf("ciphertext too short")
@@ -91,13 +105,14 @@ func decryptCookie(cipherText string, secretKey []byte) (string, error) {
 func generateCookie(secretKey *string) (Cookie, error) {
 	newUUID, err := uuid.NewUUID()
 	if err != nil {
-		return Cookie{}, err
+		return Cookie{}, errors.Wrap(err, "error while generate UUID")
 	}
 	uid := newUUID.String()
 	encryptedCookie, err := encryptCookie(uid, []byte(*secretKey))
 	if err != nil {
-		return Cookie{}, err
+		return Cookie{}, errors.Wrap(err, "error while encrypting cookie")
 	}
-	expiration := time.Now().Add(24 * time.Hour)
+	const oneDay = 24 * time.Hour
+	expiration := time.Now().Add(oneDay)
 	return Cookie{encryptedCookie, expiration, uid}, nil
 }

@@ -33,14 +33,14 @@ func (h *Handler) ShortenURLText(c RequestContext) {
 		c.String(http.StatusBadRequest, "Invalid url string.")
 		return
 	}
-	uid := c.GetString("uid")
+	uid := c.GetString(key)
 	shortenURL, err := h.shortener.ShortenURL(uri.String(), uid)
 	if err != nil {
 		if err.Error() == "URL already exists" {
 			c.String(http.StatusConflict, shortenURL)
 			return
 		}
-		logger.Log.Infof("Trouble while shortening url. Error while shortener.ShortenString() :", err)
+		logger.Log.Infof("Trouble while shortening url. Error while shortener.ShortenString(): %v", err)
 		c.String(http.StatusBadRequest, "Trouble while shortening url.")
 		return
 	}

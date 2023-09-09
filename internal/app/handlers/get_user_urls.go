@@ -8,7 +8,8 @@ import (
 // GetUserURL is a function that handles a request to retrieve the original URL associated with a user.
 // It expects a RequestContext object as the input parameter.
 //
-// If the "uid" parameter in the request context is empty, it logs an informational message and returns an unauthorized status.
+// If the "uid" parameter in the request context is empty, it logs an informational message and returns an unauthorized
+// status.
 //
 // If there is an error while retrieving the shortened URL associated with the provided user ID,
 // it logs an error message and returns a bad request status.
@@ -17,7 +18,7 @@ import (
 //
 // If everything is successful, it returns the original URL associated with the user in JSON format with a status OK.
 func (h *Handler) GetUserURL(context RequestContext) {
-	uid := context.GetString("uid")
+	uid := context.GetString(key)
 	if uid == "" {
 		logger.Log.Infof("uid is empty")
 		context.AbortWithStatus(http.StatusUnauthorized)
@@ -25,7 +26,7 @@ func (h *Handler) GetUserURL(context RequestContext) {
 	}
 	originalURL, err := h.shortener.GetShortenedURLByUserID(uid)
 	if err != nil {
-		logger.Log.Infof("error while shortening url: %v", err)
+		logger.Log.Infof(shorteningErrorTemplate, err)
 		context.AbortWithStatus(http.StatusBadRequest)
 		return
 	}

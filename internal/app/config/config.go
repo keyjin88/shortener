@@ -2,11 +2,12 @@ package config
 
 import (
 	"flag"
-	"github.com/caarlos0/env/v6"
 	"log"
+
+	"github.com/caarlos0/env/v6"
 )
 
-// Config represents a configuration of application
+// Config represents a configuration of application.
 type Config struct {
 	ServerAddress   string `env:"SERVER_ADDRESS"`
 	BaseAddress     string `env:"BASE_URL"`
@@ -20,13 +21,13 @@ type Config struct {
 	PathToKey       string `env:"PATH_TO_KEY"`
 }
 
-// NewConfig creates a new Config instance with the given parameters
+// NewConfig creates a new Config instance with the given parameters.
 func NewConfig() *Config {
 	return &Config{}
 }
 
 // InitConfig обрабатывает аргументы командной строки
-// и сохраняет их значения в соответствующих переменных
+// и сохраняет их значения в соответствующих переменных.
 func (config *Config) InitConfig() {
 	flag.StringVar(&config.ServerAddress, "a", "localhost:8080", "address and port to run server")
 	flag.StringVar(&config.BaseAddress, "b", "http://localhost:8080", "base address for shortened url")
@@ -40,8 +41,8 @@ func (config *Config) InitConfig() {
 	flag.StringVar(&config.PathToKey, "ptk", "path/to/key.pem", "Path to Key")
 
 	// Оставил для локальных тестов
-	//flag.StringVar(&config.DataBaseDSN, "d", "postgres://pgadmin:postgres@localhost:5432/shortener", "database dsn")
-	// парсим переданные серверу аргументы в зарегистрированные переменные
+	// flag.StringVar(&config.DataBaseDSN, "d", "postgres://pgadmin:postgres@localhost:5432/shortener", "database dsn")
+	// парсим переданные серверу аргументы в зарегистрированные переменные.
 	flag.Parse()
 	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по умолчанию из флагов
 	err := env.Parse(config)

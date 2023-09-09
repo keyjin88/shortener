@@ -7,6 +7,7 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
 	"github.com/stretchr/testify/assert"
+	"go/constant"
 	"testing"
 )
 
@@ -81,7 +82,9 @@ func TestShortenService_ShortenString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return(storage.ShortenedURL{}, errors.New("not found url"))
+			mockURLRepository.EXPECT().FindByShortenedURL(
+				gomock.Any()).Return(storage.ShortenedURL{},
+				errors.New("not found url"))
 			mockURLRepository.EXPECT().Save(gomock.Any()).Times(tt.args.repositoryCallCount)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
@@ -90,7 +93,7 @@ func TestShortenService_ShortenString(t *testing.T) {
 
 			got, err := s.ShortenURL(tt.args.serviceArgs, "any string")
 			assert.Equal(t, tt.wantErr, err)
-			assert.IsType(t, "String", got)
+			assert.IsType(t, constant.String.String(), got)
 		})
 	}
 }
@@ -217,7 +220,9 @@ func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindAllByUserID(gomock.Any()).Return(tt.repositoryReturn.result, tt.repositoryReturn.error)
+			mockURLRepository.EXPECT().
+				FindAllByUserID(gomock.Any()).
+				Return(tt.repositoryReturn.result, tt.repositoryReturn.error)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 				config:        &Config{},

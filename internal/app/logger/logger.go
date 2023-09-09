@@ -1,6 +1,7 @@
 package logger
 
 import (
+	"github.com/pkg/errors"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -16,20 +17,19 @@ func Initialize(level string) error {
 
 	lvl, err := zap.ParseAtomicLevel(level)
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to parse log level")
 	}
 	// создаём новую конфигурацию логера
 	cfg := zap.NewProductionConfig()
 	// устанавливаем уровень
 	cfg.Level = lvl
-	//настраиваем формат даты
+	// настраиваем формат даты
 	cfg.EncoderConfig.EncodeTime = zapcore.TimeEncoderOfLayout("2006-01-02 15:04:05")
 	// создаём логер на основе конфигурации
 	zl, err := cfg.Build()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "failed to build logger")
 	}
-
 	// делаем регистратор SugaredLogger
 	// устанавливаем синглтон
 	Log = *zl.Sugar()

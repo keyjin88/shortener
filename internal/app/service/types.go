@@ -5,15 +5,17 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage"
 )
 
-// ShortenService is a service for shortening URLs
+const findURLErrorTemplate = "failed to find URL: %w"
+
+// ShortenService is a service for shortening URLs.
 type ShortenService struct {
 	urlRepository URLRepository
 	config        *Config
 }
 
-// Config is a cinfig for shortening URLs
+// Config is a cinfig for shortening URLs.
 type Config struct {
-	BaseAddress string //base address for shortened url
+	BaseAddress string // base address for shortened url
 }
 
 //go:generate mockgen -destination=mocks/url_repository.go -package=mocks . URLRepository

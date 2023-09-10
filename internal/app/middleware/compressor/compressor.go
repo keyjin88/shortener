@@ -12,7 +12,7 @@ const compressType = "gzip"
 // CompressionMiddleware is a middleware that compresses and decompress data.
 func CompressionMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		var err error // Объявление переменной err
+		// Принимаем запросы в сжатом формате
 		encoding := c.GetHeader("Content-Encoding")
 		if strings.Contains(encoding, compressType) {
 			compressReader, err := newCompressReader(c.Request.Body)
@@ -20,11 +20,7 @@ func CompressionMiddleware() gin.HandlerFunc {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 				return
 			}
-			defer func() {
-				if closeErr := compressReader.Close(); closeErr != nil && err == nil {
-					err = closeErr
-				}
-			}()
+			defer compressReader.Close()
 			c.Request.Body = compressReader
 		}
 
@@ -35,11 +31,7 @@ func CompressionMiddleware() gin.HandlerFunc {
 			case "application/json", "text/html":
 				compressWriter := newCompressWriter(c.Writer)
 				compressWriter.writer.Header().Set(contentType, compressType)
-				defer func() {
-					if closeErr := compressWriter.Close(); closeErr != nil && err == nil {
-						err = closeErr
-					}
-				}()
+				defer compressWriter.Close()
 			}
 			// Продолжаем обработку запроса
 			c.Next()

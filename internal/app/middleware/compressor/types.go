@@ -2,8 +2,6 @@ package compressor
 
 import (
 	"compress/gzip"
-
-	"github.com/pkg/errors"
 	"io"
 	"net/http"
 )
@@ -22,12 +20,7 @@ func newCompressWriter(w http.ResponseWriter) *compressWriter {
 
 // Close closes the compressor writer.
 func (c *compressWriter) Close() error {
-	var err error
-	if c.gzipWriter != nil {
-		err = c.gzipWriter.Close()
-		c.gzipWriter = nil
-	}
-	return errors.Wrap(err, "error while closing gzipWriter")
+	return c.gzipWriter.Close()
 }
 
 type compressReader struct {
@@ -38,7 +31,7 @@ type compressReader struct {
 func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 	gzipReader, err := gzip.NewReader(r)
 	if err != nil {
-		return nil, errors.Wrap(err, "error while creating compressor reader")
+		return nil, err
 	}
 
 	return &compressReader{
@@ -49,26 +42,13 @@ func newCompressReader(r io.ReadCloser) (*compressReader, error) {
 
 // Read reads compressed data from the compressor reader.
 func (c *compressReader) Read(p []byte) (n int, err error) {
-	n, err = c.gzipReader.Read(p)
-	if err != nil {
-		return n, errors.Wrap(err, "failed to read compressed data")
-	}
-	return n, nil
+	return c.gzipReader.Read(p)
 }
 
 // Close closes the compressor reader.
 func (c *compressReader) Close() error {
-	var err error
-	if c.reader != nil {
-		err = c.reader.Close()
-		c.reader = nil
+	if err := c.reader.Close(); err != nil {
+		return err
 	}
-	if c.gzipReader != nil {
-		gzipErr := c.gzipReader.Close()
-		c.gzipReader = nil
-		if err == nil {
-			err = gzipErr
-		}
-	}
-	return err
+	return c.gzipReader.Close()
 }

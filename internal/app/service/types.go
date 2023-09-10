@@ -5,7 +5,7 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage"
 )
 
-const findURLErrorTemplate = "failed to find URL: %w"
+const findURLErrorTemplate = "failed to find URL from repository"
 
 // ShortenService is a service for shortening URLs.
 type ShortenService struct {

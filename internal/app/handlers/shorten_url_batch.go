@@ -28,7 +28,7 @@ func (h *Handler) ShortenURLBatch(c RequestContext) {
 	batch, err := h.shortener.ShortenURLBatch(req, uid)
 	if err != nil {
 		logger.Log.Infof(shorteningErrorTemplate, err)
-		c.JSON(http.StatusBadRequest, gin.H{"error": shorteningErrorTemplate})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
 		return
 	}
 	c.JSON(http.StatusCreated, batch)

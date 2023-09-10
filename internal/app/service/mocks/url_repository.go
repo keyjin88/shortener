@@ -47,7 +47,7 @@ func (mr *MockURLRepositoryMockRecorder) Close() *gomock.Call {
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Close", reflect.TypeOf((*MockURLRepository)(nil).Close))
 }
 
-// DeleteRecords mocks base method.
+// Delete mocks base method.
 func (m *MockURLRepository) Delete(arg0 []string, arg1 string) error {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Delete", arg0, arg1)
@@ -55,8 +55,8 @@ func (m *MockURLRepository) Delete(arg0 []string, arg1 string) error {
 	return ret0
 }
 
-// DeleteRecords indicates an expected call of DeleteRecords.
-func (mr *MockURLRepositoryMockRecorder) DeleteRecords(arg0, arg1 interface{}) *gomock.Call {
+// Delete indicates an expected call of Delete.
+func (mr *MockURLRepositoryMockRecorder) Delete(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Delete", reflect.TypeOf((*MockURLRepository)(nil).Delete), arg0, arg1)
 }

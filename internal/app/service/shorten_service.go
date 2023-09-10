@@ -1,12 +1,13 @@
 package service
 
 import (
-	"errors"
 	"fmt"
+
 	"github.com/google/uuid"
 	"github.com/jackc/pgerrcode"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/keyjin88/shortener/internal/app/storage"
+	"github.com/pkg/errors"
 	"time"
 )
 
@@ -24,7 +25,7 @@ func NewShortenService(urlRepository URLRepository, baseAddress string) *Shorten
 func (s *ShortenService) GetShortenedURLByID(id string) (storage.ShortenedURL, error) {
 	url, err := s.urlRepository.FindByShortenedURL(id)
 	if err != nil {
-		return storage.ShortenedURL{}, fmt.Errorf(findURLErrorTemplate, err)
+		return storage.ShortenedURL{}, errors.Wrap(err, findURLErrorTemplate)
 	}
 	return url, nil
 }
@@ -33,7 +34,7 @@ func (s *ShortenService) GetShortenedURLByID(id string) (storage.ShortenedURL, e
 func (s *ShortenService) GetShortenedURLByUserID(userID string) ([]storage.UsersURLResponse, error) {
 	usersURLResponses, err := s.urlRepository.FindAllByUserID(userID)
 	if err != nil {
-		return nil, fmt.Errorf(findURLErrorTemplate, err)
+		return nil, errors.Wrap(err, findURLErrorTemplate)
 	}
 	for i, u := range usersURLResponses {
 		usersURLResponses[i].ShortURL = s.config.BaseAddress + "/" + u.ShortURL
@@ -111,7 +112,7 @@ func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest,
 func (s *ShortenService) DeleteURLs(req *[]string, userID string) error {
 	err := s.urlRepository.Delete(*req, userID)
 	if err != nil {
-		return fmt.Errorf("failed to delete URL: %w", err)
+		return errors.Wrap(err, "failed to delete UR")
 	}
 	return nil
 }

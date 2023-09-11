@@ -19,8 +19,11 @@ var (
 func main() {
 	printBuildInfo()
 	server := app.New()
-	// api server start
-	logger.Log.Panic(server.Start())
+	err := server.Start()
+	if nil != err {
+		logger.Log.Info("Error starting api server")
+		return
+	}
 }
 
 func printBuildInfo() {

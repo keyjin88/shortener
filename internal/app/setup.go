@@ -18,8 +18,8 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage/file"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
 	"github.com/keyjin88/shortener/internal/app/storage/postgres"
+	"github.com/pkg/errors"
 
-	"errors"
 	"log"
 	"net/http"
 	"os"
@@ -68,20 +68,21 @@ func (api *API) Start() error {
 		Handler: api.router,
 	}
 
+	// Запускаем HTTP-сервер в отдельной горутине
 	go func() {
-		if err := srv.ListenAndServe(); err != nil && !errors.Is(http.ErrServerClosed, err) {
+		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			logger.Log.Infof("Error while start server")
 		}
 	}()
 	logger.Log.Infof("Server started")
-	// Ожидаем получения сигнала остановки.
+	// Ожидаем получения сигнала остановки
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
 	<-quit
 	logger.Log.Infof("Stop signal received")
-	// Отменяем контекст для graceful shutdown.
+	// Отменяем контекст для graceful shutdown
 	cancel()
-	// Устанавливаем таймаут для graceful shutdown.
+	// Устанавливаем таймаут для graceful shutdown
 	duration := 5 * time.Second
 	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), duration)
 	defer cancelShutdown()
@@ -90,7 +91,7 @@ func (api *API) Start() error {
 	if err := srv.Shutdown(ctxShutdown); err != nil {
 		logger.Log.Infof("Error shutting down")
 	}
-	log.Println("Сервер остановлен")
+	logger.Log.Infof("Server stopped")
 	return nil
 }
 

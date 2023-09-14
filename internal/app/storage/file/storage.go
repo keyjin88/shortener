@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"github.com/keyjin88/shortener/internal/app/storage"
+	"github.com/pkg/errors"
 	"os"
 )
 
@@ -15,18 +16,18 @@ type URLRepositoryFile struct {
 	file *os.File
 }
 
-// NewURLRepositoryFile creates a new URLRepositoryFile
+// NewURLRepositoryFile creates a new URLRepositoryFile.
 func NewURLRepositoryFile(filePath *string) (*URLRepositoryFile, error) {
-	file, err := os.OpenFile(*filePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0644)
+	file, err := os.OpenFile(*filePath, os.O_APPEND|os.O_RDWR|os.O_CREATE, 0600)
 	if err != nil {
 		logger.Log.Infof("error while opening file: %v", err)
-		return nil, err
+		return nil, errors.Wrap(err, "error while opening file")
 	}
 	urlRepositoryFile := URLRepositoryFile{file: file}
 	return &urlRepositoryFile, nil
 }
 
-// FindByShortenedURL find URL by given shortened string in file
+// FindByShortenedURL find URL by given shortened string in file.
 func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -50,7 +51,7 @@ func (r *URLRepositoryFile) FindByShortenedURL(shortURL string) (storage.Shorten
 	return storage.ShortenedURL{}, fmt.Errorf("URL not found: %v", shortURL)
 }
 
-// FindByOriginalURL find shortened URL by original URL
+// FindByOriginalURL find shortened URL by original URL.
 func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -74,7 +75,7 @@ func (r *URLRepositoryFile) FindByOriginalURL(originalURL string) (string, error
 	return "", fmt.Errorf("URL not found: %v", originalURL)
 }
 
-// FindAllByUserID find URLs by user ID
+// FindAllByUserID find URLs by user ID.
 func (r *URLRepositoryFile) FindAllByUserID(userID string) ([]storage.UsersURLResponse, error) {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -99,7 +100,7 @@ func (r *URLRepositoryFile) FindAllByUserID(userID string) ([]storage.UsersURLRe
 	return userURLs, nil
 }
 
-// SaveBatch saves a batch of USRs to storage
+// SaveBatch saves a batch of USRs to storage.
 func (r *URLRepositoryFile) SaveBatch(urls *[]storage.ShortenedURL) error {
 	_, err := r.file.Seek(0, 0)
 	if err != nil {
@@ -119,14 +120,19 @@ func (r *URLRepositoryFile) SaveBatch(urls *[]storage.ShortenedURL) error {
 	return nil
 }
 
-// Save method for saving URL in storage
+// Save method for saving URL in storage.
 func (r *URLRepositoryFile) Save(data *storage.ShortenedURL) error {
 	urlJSONAsBytes, err := json.Marshal(data)
 	if err != nil {
 		return err
 	}
 	writer := bufio.NewWriter(r.file)
-	defer writer.Flush()
+	defer func(writer *bufio.Writer) {
+		err := writer.Flush()
+		if err != nil {
+			logger.Log.Infof("error while flushing to file: %v", err)
+		}
+	}(writer)
 	_, err = writer.Write(urlJSONAsBytes)
 	if err != nil {
 		return err
@@ -138,7 +144,7 @@ func (r *URLRepositoryFile) Save(data *storage.ShortenedURL) error {
 	return nil
 }
 
-// Close method closes the repository
+// Close method closes the repository.
 func (r *URLRepositoryFile) Close() {
 	err := r.file.Close()
 	if err != nil {
@@ -147,8 +153,8 @@ func (r *URLRepositoryFile) Close() {
 	}
 }
 
-// Ping method pings storage
-func (r *URLRepositoryFile) Ping(ctx context.Context) error {
+// Ping method pings storage.
+func (r *URLRepositoryFile) Ping(_ context.Context) error {
 	if _, err := os.Stat(r.file.Name()); os.IsNotExist(err) {
 		return fmt.Errorf("file not found: %s", r.file.Name())
 	} else {
@@ -156,15 +162,19 @@ func (r *URLRepositoryFile) Ping(ctx context.Context) error {
 	}
 }
 
-// Delete method deleted URLs by given IDs
-func (r *URLRepositoryFile) Delete(ids []string, userID string) error {
+// Delete method deleted URLs by given IDs.
+func (r *URLRepositoryFile) Delete(ids []string, _ string) error {
 	// Открыть файл для чтения и записи
 	file, err := os.OpenFile(r.file.Name(), os.O_RDWR, 0644)
 	if err != nil {
 		return err
 	}
-	defer file.Close()
-
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			logger.Log.Infof("error while flushing to file")
+		}
+	}(file)
 	// Прочитать содержимое файла в память
 	scanner := bufio.NewScanner(file)
 	var lines []string

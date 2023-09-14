@@ -380,7 +380,6 @@ linters:
     - gocritic
     - godot
     - gofmt
-    - goimports
     - gomnd
     - goprintffuncname
     - gosec

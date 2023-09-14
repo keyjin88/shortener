@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// DBPing is used to ping a database
+// DBPing is used to ping a database.
 func (h *Handler) DBPing(c RequestContext) {
 	err := h.pinger.Ping(context.Background())
 	if err != nil {

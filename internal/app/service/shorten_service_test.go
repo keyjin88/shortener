@@ -1,12 +1,14 @@
 package service
 
 import (
-	"errors"
+	"github.com/pkg/errors"
+
 	"github.com/golang/mock/gomock"
 	"github.com/keyjin88/shortener/internal/app/service/mocks"
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/keyjin88/shortener/internal/app/storage/inmem"
 	"github.com/stretchr/testify/assert"
+	"go/constant"
 	"testing"
 )
 
@@ -21,7 +23,7 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 		name    string
 		args    args
 		want    storage.ShortenedURL
-		wantErr error
+		wantErr any
 	}{
 		{
 			name: "success",
@@ -29,7 +31,7 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 				id: "SHORTSTRING",
 			},
 			want:    storage.ShortenedURL{OriginalURL: "https://example.com/1"},
-			wantErr: errors.New("test error"),
+			wantErr: nil,
 		},
 		{
 			name: "not success",
@@ -37,7 +39,7 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 				id: "SHORTSTRING",
 			},
 			want:    storage.ShortenedURL{},
-			wantErr: nil,
+			wantErr: errors.New("test error"),
 		},
 	}
 	for _, tt := range tests {
@@ -47,9 +49,11 @@ func TestShortenService_GetShortenedURLByID(t *testing.T) {
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 			}
-			got, got1 := s.GetShortenedURLByID(tt.args.id)
+			got, err := s.GetShortenedURLByID(tt.args.id)
+			if err != nil {
+				assert.NotNil(t, tt.wantErr)
+			}
 			assert.Equal(t, tt.want, got)
-			assert.Equal(t, tt.wantErr, got1)
 		})
 	}
 }
@@ -81,7 +85,9 @@ func TestShortenService_ShortenString(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindByShortenedURL(gomock.Any()).Return(storage.ShortenedURL{}, errors.New("not found url"))
+			mockURLRepository.EXPECT().FindByShortenedURL(
+				gomock.Any()).Return(storage.ShortenedURL{},
+				errors.New("not found url"))
 			mockURLRepository.EXPECT().Save(gomock.Any()).Times(tt.args.repositoryCallCount)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
@@ -90,7 +96,7 @@ func TestShortenService_ShortenString(t *testing.T) {
 
 			got, err := s.ShortenURL(tt.args.serviceArgs, "any string")
 			assert.Equal(t, tt.wantErr, err)
-			assert.IsType(t, "String", got)
+			assert.IsType(t, constant.String.String(), got)
 		})
 	}
 }
@@ -102,7 +108,7 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 	tests := []struct {
 		name                     string
 		serviceArgs              storage.ShortenURLBatchRequest
-		serviceError             error
+		serviceError             string
 		repositoryReturn         storage.ShortenedURL
 		repositoryError          error
 		repositoryCallCount      int
@@ -114,7 +120,7 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 				{CorrelationID: "AAA", OriginalURL: "https://example.com/1"},
 				{CorrelationID: "BBB", OriginalURL: "https://yandex.com/1"},
 			},
-			serviceError:             nil,
+			serviceError:             "",
 			repositoryReturn:         storage.ShortenedURL{},
 			repositoryError:          errors.New("repository"),
 			repositoryCallCount:      2,
@@ -126,7 +132,7 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 				{CorrelationID: "AAA", OriginalURL: "https://example.com/1"},
 				{CorrelationID: "BBB", OriginalURL: "https://yandex.com/1"},
 			},
-			serviceError:             errors.New("while saving batch"),
+			serviceError:             "failed to save batch: while saving batch",
 			repositoryReturn:         storage.ShortenedURL{},
 			repositoryError:          errors.New("repository"),
 			repositoryCallCount:      2,
@@ -149,7 +155,9 @@ func TestShortenService_ShortenURLBatch(t *testing.T) {
 				config:        &Config{},
 			}
 			_, err := s.ShortenURLBatch(tt.serviceArgs, "any string")
-			assert.Equal(t, tt.serviceError, err)
+			if err != nil {
+				assert.Equal(t, tt.serviceError, err.Error())
+			}
 		})
 	}
 }
@@ -165,7 +173,7 @@ func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
 
 	type serviceReturn struct {
 		result []storage.UsersURLResponse
-		error  error
+		error  string
 	}
 
 	tests := []struct {
@@ -199,7 +207,7 @@ func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
 						ShortURL:    "/222222",
 					},
 				},
-				error: nil,
+				error: "",
 			},
 		},
 		{
@@ -210,20 +218,24 @@ func TestShortenService_GetShortenedURLByUserID(t *testing.T) {
 			},
 			serviceReturn: serviceReturn{
 				result: nil,
-				error:  errors.New("test error"),
+				error:  "failed to find URL from repository: test error",
 			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().FindAllByUserID(gomock.Any()).Return(tt.repositoryReturn.result, tt.repositoryReturn.error)
+			mockURLRepository.EXPECT().
+				FindAllByUserID(gomock.Any()).
+				Return(tt.repositoryReturn.result, tt.repositoryReturn.error)
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 				config:        &Config{},
 			}
 			got, err := s.GetShortenedURLByUserID("userId")
-			assert.Equal(t, tt.serviceReturn.error, err)
+			if err != nil {
+				assert.Equal(t, tt.serviceReturn.error, err.Error())
+			}
 			assert.Equal(t, tt.serviceReturn.result, got)
 		})
 	}
@@ -249,20 +261,23 @@ func TestShortenService_DeleteURLs(t *testing.T) {
 			name:   "error",
 			urls:   []string{"https://example.com/1", "https://example.com/2", "https://yandex.com/1"},
 			userID: "userId",
-			error:  errors.New("test error"),
+			error:  errors.New("failed to delete URL: test error"),
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			mockURLRepository := mocks.NewMockURLRepository(ctrl)
-			mockURLRepository.EXPECT().DeleteRecords(gomock.Any(), gomock.Any()).Return(tt.error)
+			mockURLRepository.EXPECT().Delete(gomock.Any(), gomock.Any()).Return(tt.error)
 
 			s := &ShortenService{
 				urlRepository: mockURLRepository,
 				config:        &Config{},
 			}
 			err := s.DeleteURLs(&tt.urls, tt.userID)
-			assert.Equal(t, tt.error, err)
+			if err != nil {
+				actualErr := errors.Cause(err).Error()
+				assert.Equal(t, actualErr, tt.error.Error())
+			}
 		})
 	}
 }

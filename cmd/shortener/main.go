@@ -2,12 +2,14 @@ package main
 
 import (
 	"fmt"
+
 	"github.com/keyjin88/shortener/internal/app"
 	"github.com/keyjin88/shortener/internal/app/logger"
 )
 
 // Переменные для вывода флагов
-// go build -ldflags "-X main.buildVersion=0.20.1 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')' -X main.buildCommit=Iteration20" main.go
+// go build -ldflags "-X main.buildVersion=0.20.1 -X 'main.buildDate=$(date +'%Y/%m/%d %H:%M:%S')'
+// -X main.buildCommit=Iteration20" main.go.
 var (
 	buildVersion string
 	buildDate    string
@@ -17,19 +19,23 @@ var (
 func main() {
 	printBuildInfo()
 	server := app.New()
-	//api server start
-	logger.Log.Panic(server.Start())
+	err := server.Start()
+	if nil != err {
+		logger.Log.Errorf("Error starting api server: %v", err)
+		return
+	}
 }
 
 func printBuildInfo() {
+	const NotAssigned = "N/A"
 	if buildVersion == "" {
-		buildVersion = "N/A"
+		buildVersion = NotAssigned
 	}
 	if buildDate == "" {
-		buildDate = "N/A"
+		buildDate = NotAssigned
 	}
 	if buildCommit == "" {
-		buildCommit = "N/A"
+		buildCommit = NotAssigned
 	}
 
 	fmt.Println("Build version:", buildVersion)

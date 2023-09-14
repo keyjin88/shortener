@@ -2,20 +2,24 @@ package postgres
 
 import (
 	"context"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/keyjin88/shortener/internal/app/logger"
 	"github.com/keyjin88/shortener/internal/app/storage"
+	"github.com/pkg/errors"
 	"time"
 )
 
-// URLRepositoryPostgres is Postgres repository
+// URLRepositoryPostgres is Postgres repository.
 type URLRepositoryPostgres struct {
 	dbPool       *pgxpool.Pool
 	urlsToDelete chan storage.UserURLs
 }
 
-// NewPostgresRepository creates a new URLRepositoryPostgres
-func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context, toDeleteChan chan storage.UserURLs) (*URLRepositoryPostgres, error) {
+// NewPostgresRepository creates a new URLRepositoryPostgres.
+func NewPostgresRepository(pool *pgxpool.Pool,
+	ctx context.Context,
+	toDeleteChan chan storage.UserURLs) (*URLRepositoryPostgres, error) {
 	query := `create table if not exists public.shortened_url
 (
     id             serial
@@ -31,13 +35,13 @@ func NewPostgresRepository(pool *pgxpool.Pool, ctx context.Context, toDeleteChan
 );`
 	_, err := pool.Exec(ctx, query)
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "error while executing query")
 	}
 	go WorkerDeleteURLs(toDeleteChan, pool)
 	return &URLRepositoryPostgres{dbPool: pool, urlsToDelete: toDeleteChan}, nil
 }
 
-// FindByShortenedURL find URL by given shortened string in DB
+// FindByShortenedURL find URL by given shortened string in DB.
 func (r *URLRepositoryPostgres) FindByShortenedURL(shortURL string) (storage.ShortenedURL, error) {
 	ctx := context.Background()
 	query := `SELECT original_url, is_deleted FROM public.shortened_url WHERE short_url = $1`

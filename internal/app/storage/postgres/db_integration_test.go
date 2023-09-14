@@ -13,6 +13,7 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage"
 	"github.com/ory/dockertest"
 	"github.com/ory/dockertest/docker"
+	"github.com/stretchr/testify/assert"
 	"strconv"
 	"strings"
 	"time"
@@ -119,7 +120,7 @@ func runMain(m *testing.M) (int, error) {
 		}
 		return nil
 	}); err != nil {
-		return 1, err
+		return 1, fmt.Errorf("failed to retry connect to the DB: %w", err)
 	}
 
 	defer func() {
@@ -179,48 +180,118 @@ func getHostPort(hostPort string) (string, uint16, error) {
 	return hostPortParts[0], uint16(port), nil
 }
 
+func initRepository() *URLRepositoryPostgres {
+	dsn := getDSN()
+	dbPool, err := pgxpool.New(context.Background(), dsn)
+	if err != nil {
+		logger.Log.Errorf("error while initialising DB Pool: %v", err)
+		return nil
+	}
+	ch := make(chan storage.UserURLs)
+	repository, err := NewPostgresRepository(dbPool, context.Background(), ch)
+	if err != nil {
+		logger.Log.Errorf("failed to create new Postgres Repository: %v", err)
+	}
+	defer repository.Close()
+	return repository
+}
+
 func TestURLRepositoryPostgres_Save(t *testing.T) {
 	err := logger.Initialize("info")
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	dsn := getDSN()
+	repository := initRepository()
+
 	tests := []struct {
-		name         string
-		shortenedURL *storage.ShortenedURL
-		ExpectedErr  error
+		name               string
+		url1               *storage.ShortenedURL
+		url2               *storage.ShortenedURL
+		ExpectedErrMessage any
 	}{
 		{
 			name: "save success",
-			shortenedURL: &storage.ShortenedURL{
+			url1: &storage.ShortenedURL{
+				UserID:      "userId",
+				UUID:        uuid.NewString(),
+				ShortURL:    "shortUrl",
+				OriginalURL: "Original URL1",
+			},
+			url2: &storage.ShortenedURL{
+				UserID:      "userId",
+				UUID:        uuid.NewString(),
+				ShortURL:    "shortUrl",
+				OriginalURL: "Original URL2",
+			},
+			ExpectedErrMessage: nil,
+		},
+		{
+			name: "save with error",
+			url1: &storage.ShortenedURL{
 				UserID:      "userId",
 				UUID:        uuid.NewString(),
 				ShortURL:    "shortUrl",
 				OriginalURL: "Original URL",
 			},
-			ExpectedErr: nil,
+			url2: &storage.ShortenedURL{
+				UserID:      "userId",
+				UUID:        uuid.NewString(),
+				ShortURL:    "shortUrl",
+				OriginalURL: "Original URL",
+			},
+			ExpectedErrMessage: "ERROR: duplicate key value violates unique constraint " +
+				"\"shortened_url_original_url_key\" (SQLSTATE 23505)",
 		},
 	}
 
-	dbPool, err := pgxpool.New(context.Background(), dsn)
-	if err != nil {
-		logger.Log.Errorf("error while initialising DB Pool: %v", err)
-		return
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			err = repository.Save(tt.url1)
+			err = repository.Save(tt.url2)
+			if err != nil {
+				assert.Equal(t, tt.ExpectedErrMessage, err.Error())
+			}
+		})
 	}
-	ch := make(chan storage.UserURLs)
-	repository, err := NewPostgresRepository(dbPool, context.Background(), ch)
+}
+
+func TestURLRepositoryPostgres_FindByShortenedURL(t *testing.T) {
+	err := logger.Initialize("info")
 	if err != nil {
-		logger.Log.Errorf("failed to create new Postgres Repository: %w", err)
+		t.Fatal(err)
 	}
-	defer repository.Close()
+
+	repository := initRepository()
+
+	tests := []struct {
+		name                   string
+		url1                   *storage.ShortenedURL
+		ExpectedSaveErrMessage any
+		ExpectedFindErrMessage any
+	}{
+		{
+			name: "find by shortened success",
+			url1: &storage.ShortenedURL{
+				UserID:      "userId",
+				UUID:        uuid.NewString(),
+				ShortURL:    "shortUrl",
+				OriginalURL: "Original URL1",
+			},
+			ExpectedSaveErrMessage: nil,
+			ExpectedFindErrMessage: nil,
+		},
+	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err2 := repository.Save(tt.shortenedURL)
-			if err2 != nil {
-				logger.Log.Infof("failed to save in DB")
+			err = repository.Save(tt.url1)
+			if err != nil {
+				assert.Equal(t, tt.ExpectedSaveErrMessage, err.Error())
 			}
+			url, err2 := repository.FindByShortenedURL(tt.url1.ShortURL)
+			assert.Equal(t, tt.ExpectedFindErrMessage, err2)
+			assert.Equal(t, tt.url1.ShortURL, url.ShortURL)
 		})
 	}
 }

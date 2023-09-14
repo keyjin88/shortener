@@ -1,8 +1,9 @@
 package handlers
 
 import (
-	"github.com/keyjin88/shortener/internal/app/logger"
 	"net/http"
+
+	"github.com/keyjin88/shortener/internal/app/logger"
 )
 
 // DeleteURLs deletes the URLs associated with the given user ID.
@@ -15,16 +16,16 @@ import (
 // error during this process, aborts the request with a 500 Internal Server Error
 // status. Finally, it responds with HTTP status 202 Accepted and an empty response body.
 func (h *Handler) DeleteURLs(context RequestContext) {
-	uid := context.GetString("uid")
+	uid := context.GetString(key)
 	if uid == "" {
-		logger.Log.Infof("uid is empty")
+		logger.Log.Infof(template)
 		context.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}
 	var req []string
 	jsonErr := context.BindJSON(&req)
 	if jsonErr != nil {
-		logger.Log.Infof("error while marshalling json data: %v", jsonErr)
+		logger.Log.Infof(marshalErrorTemplate, jsonErr)
 		context.AbortWithStatus(http.StatusBadRequest)
 		return
 	}

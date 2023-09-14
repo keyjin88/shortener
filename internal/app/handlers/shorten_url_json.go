@@ -9,7 +9,8 @@ import (
 )
 
 // ShortenURLJSON is a method that handles shortening the given URL in JSON format.
-// It reads the request data, unmarshals it into a ShortenURLRequest object, and then calls the shortener's ShortenURL method.
+// It reads the request data, unmarshals it into a ShortenURLRequest object, and then calls the shortener's ShortenURL
+// method.
 // If the URL already exists, it returns an HTTP status code of 409 (Conflict) with the existing short URL.
 // If there are any errors during the process, it returns an appropriate HTTP status code and error message.
 // Finally, it returns the shortened URL in JSON format.
@@ -17,7 +18,7 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 	var req storage.ShortenURLRequest
 	requestBytes, err := c.GetRawData()
 	if err != nil {
-		logger.Log.Infof("error while reading request: %v", err)
+		logger.Log.Infof(readRequestErrorTemplate, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while reading request"})
 		return
 	}
@@ -27,16 +28,16 @@ func (h *Handler) ShortenURLJSON(c RequestContext) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while marshalling json"})
 		return
 	}
-	uid := c.GetString("uid")
+	uid := c.GetString(key)
 	result, err := h.shortener.ShortenURL(req.URL, uid)
 	response := storage.ShortenURLResponse{Result: result}
 	if err != nil {
-		if err.Error() == "URL already exists" {
-			logger.Log.Infof("error while shortening url: %v", err)
+		if err.Error() == urlAlreadyExist {
+			logger.Log.Infof(shorteningErrorTemplate, err)
 			c.JSON(http.StatusConflict, response)
 			return
 		}
-		logger.Log.Infof("error while shortening url: %v", err)
+		logger.Log.Infof(shorteningErrorTemplate, err)
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Error while shortening url"})
 		return
 	}

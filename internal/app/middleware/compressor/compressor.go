@@ -6,15 +6,12 @@ import (
 	"strings"
 )
 
-const contentType = "Content-Type"
-const compressionType = "gzip"
-
 // CompressionMiddleware is a middleware that compresses and decompress data.
 func CompressionMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		// Принимаем запросы в сжатом формате
 		encoding := c.GetHeader("Content-Encoding")
-		if strings.Contains(encoding, compressionType) {
+		if strings.Contains(encoding, "gzip") {
 			compressReader, err := newCompressReader(c.Request.Body)
 			if err != nil {
 				c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -27,12 +24,12 @@ func CompressionMiddleware() gin.HandlerFunc {
 		}
 
 		acceptEncoding := c.GetHeader("Accept-Encoding")
-		supportsGzip := strings.Contains(acceptEncoding, compressionType)
+		supportsGzip := strings.Contains(acceptEncoding, "gzip")
 		if supportsGzip {
-			switch c.Writer.Header().Get(contentType) {
+			switch c.Writer.Header().Get("Content-Type") {
 			case "application/json", "text/html":
 				compressWriter := newCompressWriter(c.Writer)
-				compressWriter.writer.Header().Set(contentType, compressionType)
+				compressWriter.writer.Header().Set("Content-Type", "gzip")
 				defer func() {
 					_ = compressWriter.Close()
 				}()

@@ -21,7 +21,7 @@ func main() {
 	server := app.New()
 	err := server.Start()
 	if nil != err {
-		logger.Log.Info("Error starting api server")
+		logger.Log.Errorf("Error starting api server: %v", err)
 		return
 	}
 }

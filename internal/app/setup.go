@@ -20,13 +20,14 @@ import (
 	"github.com/keyjin88/shortener/internal/app/storage/postgres"
 	"github.com/pkg/errors"
 
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 )
+
+const duration = 30 * time.Second
 
 // API is the Base server instance description.
 type API struct {
@@ -71,7 +72,7 @@ func (api *API) Start() error {
 	// Запускаем HTTP-сервер в отдельной горутине
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			logger.Log.Infof("Error while start server")
+			logger.Log.Errorf("Error while listening and serving: %v", err)
 		}
 	}()
 	logger.Log.Infof("Server started")
@@ -83,14 +84,15 @@ func (api *API) Start() error {
 	// Отменяем контекст для graceful shutdown
 	cancel()
 	// Устанавливаем таймаут для graceful shutdown
-	duration := 5 * time.Second
 	ctxShutdown, cancelShutdown := context.WithTimeout(context.Background(), duration)
 	defer cancelShutdown()
 
 	// Останавливаем HTTP-сервер
 	if err := srv.Shutdown(ctxShutdown); err != nil {
-		logger.Log.Infof("Error shutting down")
+		logger.Log.Errorf("Error shutting down: %v", err)
 	}
+	// Закрываем соединения с БД
+	api.urlRepository.Close()
 	logger.Log.Infof("Server stopped")
 	return nil
 }
@@ -112,7 +114,7 @@ func (api *API) configCerts() {
 	}
 	// Запуск HTTP-сервера.
 	if err := httpServer.ListenAndServeTLS("", ""); err != nil {
-		log.Fatal("Failed to start HTTPS server:", err)
+		logger.Log.Errorf("Failed to start HTTPS server: %v", err)
 	}
 }
 

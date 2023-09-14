@@ -98,11 +98,10 @@ func (s *ShortenService) ShortenURLBatch(request storage.ShortenURLBatchRequest,
 	}
 
 	var result = make([]storage.ShortenURLBatchResponse, 0, len(urlArray))
-	for index := 0; index < len(urlArray); index++ {
-		url := urlArray[index]
+	for _, u := range urlArray {
 		result = append(result, storage.ShortenURLBatchResponse{
-			CorrelationID: url.CorrelationID,
-			ShortURL:      s.config.BaseAddress + "/" + url.ShortURL,
+			CorrelationID: u.CorrelationID,
+			ShortURL:      s.config.BaseAddress + "/" + u.ShortURL,
 		})
 	}
 	return result, nil

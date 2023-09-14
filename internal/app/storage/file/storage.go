@@ -130,7 +130,7 @@ func (r *URLRepositoryFile) Save(data *storage.ShortenedURL) error {
 	defer func(writer *bufio.Writer) {
 		err := writer.Flush()
 		if err != nil {
-			logger.Log.Infof("error while flushing to file")
+			logger.Log.Infof("error while flushing to file: %v", err)
 		}
 	}(writer)
 	_, err = writer.Write(urlJSONAsBytes)

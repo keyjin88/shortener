@@ -9,7 +9,7 @@ import (
 )
 
 // Config represents a configuration of application.
-type Config struct {
+type Config struct { //nolint:govet
 	ConfigFromJSON  string `env:"CONFIG"`
 	ServerAddress   string `env:"SERVER_ADDRESS" json:"server_address"`
 	BaseAddress     string `env:"BASE_URL" json:"base_url"`
@@ -31,6 +31,17 @@ func NewConfig() *Config {
 // InitConfig обрабатывает аргументы командной строки
 // и сохраняет их значения в соответствующих переменных.
 func (config *Config) InitConfig() {
+	if config.ConfigFromJSON != "" {
+		configData, err := os.ReadFile(config.ConfigFromJSON)
+		if err != nil {
+			logger.Log.Panicf("failed to read JSON configuration file: %v", err)
+		}
+
+		// Применение значений из файла конфигурации к структуре Config
+		if err := json.Unmarshal(configData, &config); err != nil {
+			logger.Log.Panicf("failed to parse JSON configuration file: %v", err)
+		}
+	}
 	flag.StringVar(&config.ConfigFromJSON, "c", "", "Path to config file")
 	flag.StringVar(&config.ServerAddress, "a", "localhost:8080", "address and port to run server")
 	flag.StringVar(&config.BaseAddress, "b", "http://localhost:8080", "base address for shortened url")
@@ -47,17 +58,6 @@ func (config *Config) InitConfig() {
 	// flag.StringVar(&config.DataBaseDSN, "d", "postgres://pgadmin:postgres@localhost:5432/shortener", "database dsn")
 	// парсим переданные серверу аргументы в зарегистрированные переменные.
 	flag.Parse()
-	if config.ConfigFromJSON != "" {
-		configData, err := os.ReadFile(config.ConfigFromJSON)
-		if err != nil {
-			logger.Log.Errorf("failed to read JSON configuration file: %v", err)
-		}
-
-		// Применение значений из файла конфигурации к структуре Config
-		if err := json.Unmarshal(configData, &config); err != nil {
-			logger.Log.Errorf("failed to parse JSON configuration file: %v", err)
-		}
-	}
 	// Пробуем распарсить переменные окружения, если их не будет, то оставляем значения по умолчанию из флагов
 	err := env.Parse(config)
 	if err != nil {

@@ -6,11 +6,10 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"github.com/pkg/errors"
-
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
 	"github.com/keyjin88/shortener/internal/app/logger"
+	"github.com/pkg/errors"
 	"io"
 	"net/http"
 	"time"
